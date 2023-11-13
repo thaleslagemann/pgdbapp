@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   HomePageState createState() => HomePageState();
 }
@@ -47,7 +49,7 @@ class HomePageState extends State<HomePage> {
                           size: 80,
                         ),
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 10),
                       Center(
                         child: Text('Hello, User!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white)),
                       ),
@@ -68,20 +70,38 @@ class HomePageState extends State<HomePage> {
                 children: [
                   Expanded(
                     child: ListView(
-                      shrinkWrap: true,
                       children: [
+                        SizedBox(
+                          height: 20,
+                        ),
                         ListTile(
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
                           leading: Icon(Icons.menu_book, color: Colors.black87),
+                          trailing: Icon(Icons.keyboard_arrow_right, color: Colors.black87),
                           title: Text('Aulas Avaliadas', style: TextStyle(color: Colors.black87)),
+                          onTap: () {
+                            setState(() {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                            });
+                          },
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 30),
+                          child: Divider(
+                            thickness: 1,
+                            color: Colors.black26,
+                            height: 0,
+                          ),
                         ),
                         ExpansionTile(
+                          tilePadding: EdgeInsets.symmetric(horizontal: 10),
                           leading: Icon(
                             Icons.menu_book,
                             color: Colors.black87,
                           ),
                           trailing: Icon(
                             _customTileExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                            color: Colors.black,
+                            color: Colors.black87,
                           ),
                           iconColor: Colors.black,
                           textColor: Colors.black,
@@ -90,7 +110,8 @@ class HomePageState extends State<HomePage> {
                               _customTileExpanded = !_customTileExpanded;
                             });
                           },
-                          shape: Border.all(width: 0, color: Colors.white),
+                          shape: Border(bottom: BorderSide(color: Colors.white, width: 0)),
+                          collapsedShape: Border(bottom: BorderSide(color: Colors.white, width: 0)),
                           title: Text('Relatórios', style: TextStyle(color: Colors.black87)),
                           children: [
                             Container(
@@ -98,49 +119,75 @@ class HomePageState extends State<HomePage> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    ListTile(
-                                      title: Text(
-                                        'Diários',
-                                        style: TextStyle(fontSize: 16, color: Colors.black54),
-                                        textAlign: TextAlign.start,
+                                    Container(
+                                      margin: EdgeInsets.symmetric(horizontal: 30),
+                                      decoration: BoxDecoration(
+                                          border:
+                                              Border(bottom: BorderSide(color: Colors.black26, width: 1), top: BorderSide(color: Colors.black26, width: 1))),
+                                      child: ListTile(
+                                        title: Text(
+                                          'Diários',
+                                          style: TextStyle(fontSize: 16, color: Colors.black54),
+                                          textAlign: TextAlign.start,
+                                        ),
+                                        onTap: () {
+                                          setState(() {});
+                                        },
                                       ),
-                                      onTap: () {
-                                        setState(() {});
-                                      },
                                     ),
-                                    ListTile(
-                                      title: Text(
-                                        'Semanais',
-                                        style: TextStyle(fontSize: 16, color: Colors.black54),
-                                        textAlign: TextAlign.start,
+                                    Container(
+                                      margin: EdgeInsets.symmetric(horizontal: 30),
+                                      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
+                                      child: ListTile(
+                                        title: Text(
+                                          'Semanais',
+                                          style: TextStyle(fontSize: 16, color: Colors.black54),
+                                          textAlign: TextAlign.start,
+                                        ),
+                                        onTap: () {
+                                          setState(() {});
+                                        },
                                       ),
-                                      onTap: () {
-                                        setState(() {});
-                                      },
                                     ),
-                                    ListTile(
-                                      title: Text(
-                                        'Mensais',
-                                        style: TextStyle(fontSize: 16, color: Colors.black54),
-                                        textAlign: TextAlign.start,
+                                    Container(
+                                      margin: EdgeInsets.symmetric(horizontal: 30),
+                                      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
+                                      child: ListTile(
+                                        title: Text(
+                                          'Mensais',
+                                          style: TextStyle(fontSize: 16, color: Colors.black54),
+                                          textAlign: TextAlign.start,
+                                        ),
+                                        onTap: () {
+                                          setState(() {});
+                                        },
                                       ),
-                                      onTap: () {
-                                        setState(() {});
-                                      },
                                     ),
-                                    ListTile(
-                                      title: Text(
-                                        'Anuais',
-                                        style: TextStyle(fontSize: 16, color: Colors.black54),
-                                        textAlign: TextAlign.start,
+                                    Container(
+                                      margin: EdgeInsets.symmetric(horizontal: 30),
+                                      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
+                                      child: ListTile(
+                                        title: Text(
+                                          'Anuais',
+                                          style: TextStyle(fontSize: 16, color: Colors.black54),
+                                          textAlign: TextAlign.start,
+                                        ),
+                                        onTap: () {
+                                          setState(() {});
+                                        },
                                       ),
-                                      onTap: () {
-                                        setState(() {});
-                                      },
                                     ),
                                   ],
                                 ))
                           ],
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 30),
+                          child: Divider(
+                            thickness: 1,
+                            color: _customTileExpanded ? Color.fromRGBO(0, 0, 0, 0) : Colors.black26,
+                            height: 0,
+                          ),
                         ),
                       ],
                     ),
