@@ -33,33 +33,33 @@ class HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
+                        padding: EdgeInsets.zero,
                         height: 100,
                         width: 100,
                         decoration: BoxDecoration(
-                          border: Border.all(width: 8, color: Colors.black),
+                          border: Border.all(width: 7, color: Colors.black),
                           borderRadius: BorderRadius.all(Radius.circular(100)),
                           color: Colors.white,
                         ),
-                        child: Center(
-                            child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.person,
-                              color: Colors.black,
-                              size: 80,
-                            ),
-                          ],
-                        )),
+                        child: Icon(
+                          Icons.person_outline,
+                          color: Colors.black,
+                          size: 80,
+                        ),
                       ),
                       SizedBox(height: 20),
                       Center(
-                        child: Text('Hello, User!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                        child: Text('Hello, User!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white)),
                       ),
                     ],
                   ),
                 ],
               ),
+            ),
+            Divider(
+              height: 1,
+              color: Colors.black,
+              thickness: 1,
             ),
             Flexible(
               child: Row(
@@ -74,14 +74,13 @@ class HomePageState extends State<HomePage> {
                           leading: Icon(Icons.menu_book, color: Colors.black87),
                           title: Text('Aulas Avaliadas', style: TextStyle(color: Colors.black87)),
                         ),
-                        Divider(),
                         ExpansionTile(
                           leading: Icon(
                             Icons.menu_book,
                             color: Colors.black87,
                           ),
                           trailing: Icon(
-                            _customTileExpanded ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                            _customTileExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                             color: Colors.black,
                           ),
                           iconColor: Colors.black,
