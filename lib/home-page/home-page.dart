@@ -37,7 +37,7 @@ class HomePageState extends State<HomePage> {
                         height: 100,
                         width: 100,
                         decoration: BoxDecoration(
-                          border: Border.all(width: 7, color: Colors.black),
+                          border: Border.all(width: 6, color: Colors.black),
                           borderRadius: BorderRadius.all(Radius.circular(100)),
                           color: Colors.white,
                         ),
@@ -95,38 +95,49 @@ class HomePageState extends State<HomePage> {
                           children: [
                             Container(
                                 alignment: Alignment.centerLeft,
-                                padding: EdgeInsets.symmetric(horizontal: 40),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    TextButton(
-                                        onPressed: () => {},
-                                        child: Text(
-                                          '> Diários',
-                                          style: TextStyle(fontSize: 16, color: Colors.black54),
-                                          textAlign: TextAlign.start,
-                                        )),
-                                    TextButton(
-                                        onPressed: () => {},
-                                        child: Text(
-                                          '> Semanais',
-                                          style: TextStyle(fontSize: 16, color: Colors.black54),
-                                          textAlign: TextAlign.start,
-                                        )),
-                                    TextButton(
-                                        onPressed: () => {},
-                                        child: Text(
-                                          '> Mensais',
-                                          style: TextStyle(fontSize: 16, color: Colors.black54),
-                                          textAlign: TextAlign.start,
-                                        )),
-                                    TextButton(
-                                        onPressed: () => {},
-                                        child: Text(
-                                          '> Anuais',
-                                          style: TextStyle(fontSize: 16, color: Colors.black54),
-                                          textAlign: TextAlign.start,
-                                        )),
+                                    ListTile(
+                                      title: Text(
+                                        'Diários',
+                                        style: TextStyle(fontSize: 16, color: Colors.black54),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                      onTap: () {
+                                        setState(() {});
+                                      },
+                                    ),
+                                    ListTile(
+                                      title: Text(
+                                        'Semanais',
+                                        style: TextStyle(fontSize: 16, color: Colors.black54),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                      onTap: () {
+                                        setState(() {});
+                                      },
+                                    ),
+                                    ListTile(
+                                      title: Text(
+                                        'Mensais',
+                                        style: TextStyle(fontSize: 16, color: Colors.black54),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                      onTap: () {
+                                        setState(() {});
+                                      },
+                                    ),
+                                    ListTile(
+                                      title: Text(
+                                        'Anuais',
+                                        style: TextStyle(fontSize: 16, color: Colors.black54),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                      onTap: () {
+                                        setState(() {});
+                                      },
+                                    ),
                                   ],
                                 ))
                           ],
