@@ -1,6 +1,7 @@
-// ignore_for_file: avoid_unnecessary_containers, prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: avoid_unnecessary_containers, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_final_fields
 
 import 'package:flutter/material.dart';
+import 'package:pgdbapp/evaluation/evaluation_history.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,6 +12,21 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   bool _customTileExpanded = false;
+  int _permission = 0;
+
+  String _permissionSelector() {
+    switch (_permission) {
+      case 0:
+        return "Administrator";
+      case 1:
+        return "Student";
+      case 2:
+        return "Professor";
+      default:
+        return "Student";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +38,10 @@ class HomePageState extends State<HomePage> {
           children: [
             Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Colors.black, Colors.black54, Colors.white]),
+                gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Colors.black, Colors.black54, Colors.white]),
               ),
               height: MediaQuery.of(context).size.height / 2.5 - MediaQuery.of(context).padding.top,
               child: Row(
@@ -51,7 +70,14 @@ class HomePageState extends State<HomePage> {
                       ),
                       SizedBox(height: 10),
                       Center(
-                        child: Text('Hello, User!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white)),
+                        child: Column(
+                          children: [
+                            Text('Hello, User!',
+                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white)),
+                            Text('Logged in as ${_permissionSelector()}',
+                                style: TextStyle(fontWeight: FontWeight.w400, color: Colors.white)),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -74,14 +100,35 @@ class HomePageState extends State<HomePage> {
                         SizedBox(
                           height: 20,
                         ),
+                        if (_permission == 0 || _permission == 2)
+                          ListTile(
+                            contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                            leading: Icon(Icons.star_half_rounded, color: Colors.black87),
+                            trailing: Icon(Icons.keyboard_arrow_right, color: Colors.black87),
+                            title: Text('Avaliação de aulas', style: TextStyle(color: Colors.black87)),
+                            onTap: () {
+                              setState(() {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                              });
+                            },
+                          ),
+                        if (_permission == 0 || _permission == 2)
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 30),
+                            child: Divider(
+                              thickness: 1,
+                              color: Colors.black26,
+                              height: 0,
+                            ),
+                          ),
                         ListTile(
                           contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                          leading: Icon(Icons.menu_book, color: Colors.black87),
+                          leading: Icon(Icons.school_rounded, color: Colors.black87),
                           trailing: Icon(Icons.keyboard_arrow_right, color: Colors.black87),
                           title: Text('Aulas Avaliadas', style: TextStyle(color: Colors.black87)),
                           onTap: () {
                             setState(() {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationHistoryPage()));
                             });
                           },
                         ),
@@ -96,7 +143,7 @@ class HomePageState extends State<HomePage> {
                         ExpansionTile(
                           tilePadding: EdgeInsets.symmetric(horizontal: 10),
                           leading: Icon(
-                            Icons.menu_book,
+                            Icons.text_snippet_rounded,
                             color: Colors.black87,
                           ),
                           trailing: Icon(
@@ -122,8 +169,9 @@ class HomePageState extends State<HomePage> {
                                     Container(
                                       margin: EdgeInsets.symmetric(horizontal: 30),
                                       decoration: BoxDecoration(
-                                          border:
-                                              Border(bottom: BorderSide(color: Colors.black26, width: 1), top: BorderSide(color: Colors.black26, width: 1))),
+                                          border: Border(
+                                              bottom: BorderSide(color: Colors.black26, width: 1),
+                                              top: BorderSide(color: Colors.black26, width: 1))),
                                       child: ListTile(
                                         title: Text(
                                           'Diários',
@@ -137,7 +185,8 @@ class HomePageState extends State<HomePage> {
                                     ),
                                     Container(
                                       margin: EdgeInsets.symmetric(horizontal: 30),
-                                      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
+                                      decoration: BoxDecoration(
+                                          border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
                                       child: ListTile(
                                         title: Text(
                                           'Semanais',
@@ -151,7 +200,8 @@ class HomePageState extends State<HomePage> {
                                     ),
                                     Container(
                                       margin: EdgeInsets.symmetric(horizontal: 30),
-                                      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
+                                      decoration: BoxDecoration(
+                                          border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
                                       child: ListTile(
                                         title: Text(
                                           'Mensais',
@@ -165,7 +215,8 @@ class HomePageState extends State<HomePage> {
                                     ),
                                     Container(
                                       margin: EdgeInsets.symmetric(horizontal: 30),
-                                      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
+                                      decoration: BoxDecoration(
+                                          border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
                                       child: ListTile(
                                         title: Text(
                                           'Anuais',
