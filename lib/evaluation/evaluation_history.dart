@@ -13,11 +13,11 @@ class EvaluationHistoryPage extends StatefulWidget {
 
 class EvaluationHistoryPageState extends State<EvaluationHistoryPage> {
   List<Evaluation> aulasAvaliadas = [
-    Evaluation(201821179, 'ELC1071', 01, DateTime(2023, 1, 1), 10.0, 'boa aula do professor'),
-    Evaluation(201821179, 'EDE1131', 02, DateTime(2023, 1, 1), 9.0, 'boa aula do professor'),
-    Evaluation(201821179, 'ELC137', 03, DateTime(2023, 1, 1), 8.0, 'boa aula da professora'),
-    Evaluation(201821179, 'MAT1123', 04, DateTime(2023, 1, 1), 9.0, 'boa aula da professora'),
-    Evaluation(201821179, 'DPADI0185', 05, DateTime(2023, 1, 1), 10.0, 'boa aula da professora'),
+    Evaluation(201821179, 'ELC1071', 01, DateTime(2023, 1, 1), 10.0, 'boa aula do professor', true),
+    Evaluation(201821179, 'EDE1131', 02, DateTime(2023, 1, 1), 9.0, 'boa aula do professor', true),
+    Evaluation(201821179, 'ELC137', 03, DateTime(2023, 1, 1), 8.0, 'boa aula da professora', true),
+    Evaluation(201821179, 'MAT1123', 04, DateTime(2023, 1, 1), 9.0, 'boa aula da professora', true),
+    Evaluation(201821179, 'DPADI0185', 05, DateTime(2023, 1, 1), 10.0, 'boa aula da professora', true),
   ];
 
   @override

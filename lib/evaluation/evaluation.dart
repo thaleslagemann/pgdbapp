@@ -1,5 +1,5 @@
 class Evaluation {
-  const Evaluation(this.matricula, this.disciplina, this.aula, this.data, this.nota, this.comentario);
+  Evaluation(this.matricula, this.disciplina, this.aula, this.data, this.nota, this.comentario, this.evaluated);
 
   final int matricula;
   final String disciplina;
@@ -7,4 +7,5 @@ class Evaluation {
   final DateTime data;
   final double nota;
   final String comentario;
+  bool evaluated = false;
 }
