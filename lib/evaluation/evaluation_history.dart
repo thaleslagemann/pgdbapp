@@ -1,0 +1,96 @@
+// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers
+
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'evaluation.dart';
+
+class EvaluationHistoryPage extends StatefulWidget {
+  const EvaluationHistoryPage({super.key});
+
+  @override
+  EvaluationHistoryPageState createState() => EvaluationHistoryPageState();
+}
+
+class EvaluationHistoryPageState extends State<EvaluationHistoryPage> {
+  List<Evaluation> aulasAvaliadas = [
+    Evaluation(201821179, 'ELC1071', 01, DateTime(2023, 1, 1), 10.0, 'boa aula do professor'),
+    Evaluation(201821179, 'EDE1131', 02, DateTime(2023, 1, 1), 9.0, 'boa aula do professor'),
+    Evaluation(201821179, 'ELC137', 03, DateTime(2023, 1, 1), 8.0, 'boa aula da professora'),
+    Evaluation(201821179, 'MAT1123', 04, DateTime(2023, 1, 1), 9.0, 'boa aula da professora'),
+    Evaluation(201821179, 'DPADI0185', 05, DateTime(2023, 1, 1), 10.0, 'boa aula da professora'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Aulas Avaliadas',
+          style: TextStyle(color: Colors.white),
+        ),
+        iconTheme: IconThemeData(color: Colors.white),
+        flexibleSpace: SafeArea(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[Colors.black, Colors.black87, Colors.white]),
+            ),
+          ),
+        ),
+      ),
+      body: Stack(children: [
+        Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              child: Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          SizedBox(height: 15),
+                          for (var evaluation in aulasAvaliadas)
+                            ListTile(
+                              title: Container(
+                                margin: EdgeInsets.symmetric(horizontal: 60),
+                                padding: EdgeInsets.symmetric(vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  //border: Border.all(color: Colors.black, width: 1),
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5),
+                                      spreadRadius: 1,
+                                      blurRadius: 4,
+                                      offset: Offset(0, 4), // changes position of shadow
+                                    ),
+                                  ],
+                                ),
+                                child: Column(children: [
+                                  Text(DateFormat('dd-MM-yyyy').format(evaluation.data)),
+                                  Text(evaluation.disciplina),
+                                  Text(evaluation.nota.toStringAsFixed(2)),
+                                  Text(evaluation.comentario, style: TextStyle(fontSize: 12)),
+                                ]),
+                              ),
+                            )
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            )
+          ],
+        )
+      ]),
+    );
+  }
+}
