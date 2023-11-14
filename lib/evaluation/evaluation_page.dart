@@ -4,17 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'evaluation.dart';
 
-class EvaluationHistoryPage extends StatefulWidget {
-  const EvaluationHistoryPage({super.key});
+class EvaluationPage extends StatefulWidget {
+  const EvaluationPage({super.key});
 
   @override
-  EvaluationHistoryPageState createState() => EvaluationHistoryPageState();
+  EvaluationPageState createState() => EvaluationPageState();
 }
 
-class EvaluationHistoryPageState extends State<EvaluationHistoryPage> {
+class EvaluationPageState extends State<EvaluationPage> {
   List<Evaluation> aulasAvaliadas = [
     Evaluation(201821179, 'ELC1071', 01, DateTime(2023, 1, 1), 10.0, 'boa aula do professor', true),
-    Evaluation(201821179, 'EDE1131', 02, DateTime(2023, 1, 1), 9.0, 'boa aula do professor', true),
+    Evaluation(201821179, 'EDE1131', 02, DateTime(2023, 1, 1), 0.0, '', false),
     Evaluation(201821179, 'ELC137', 03, DateTime(2023, 1, 1), 8.0, 'boa aula da professora', true),
     Evaluation(201821179, 'MAT1123', 04, DateTime(2023, 1, 1), 9.0, 'boa aula da professora', true),
     Evaluation(201821179, 'DPADI0185', 05, DateTime(2023, 1, 1), 10.0, 'boa aula da professora', true),
@@ -25,7 +25,7 @@ class EvaluationHistoryPageState extends State<EvaluationHistoryPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Aulas Avaliadas',
+          'Aulas',
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: IconThemeData(color: Colors.white),
@@ -33,8 +33,8 @@ class EvaluationHistoryPageState extends State<EvaluationHistoryPage> {
           child: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
                   colors: <Color>[Colors.black, Colors.black87, Colors.white]),
             ),
           ),
@@ -74,10 +74,33 @@ class EvaluationHistoryPageState extends State<EvaluationHistoryPage> {
                                   ],
                                 ),
                                 child: Column(children: [
-                                  Text(DateFormat('dd-MM-yyyy').format(evaluation.data)),
-                                  Text(evaluation.disciplina),
-                                  Text(evaluation.nota.toStringAsFixed(2)),
-                                  Text(evaluation.comentario, style: TextStyle(fontSize: 12)),
+                                  if (evaluation.evaluated == true)
+                                    Column(
+                                      children: [
+                                        Text(DateFormat('dd/MM/yyyy').format(evaluation.data)),
+                                        Text(evaluation.disciplina),
+                                        Text(evaluation.nota.toStringAsFixed(2)),
+                                        Text("\"${evaluation.comentario}\"", style: TextStyle(fontSize: 12)),
+                                      ],
+                                    ),
+                                  if (evaluation.evaluated == false)
+                                    Column(
+                                      children: [
+                                        Text(DateFormat('dd/MM/yyyy').format(evaluation.data)),
+                                        Text(evaluation.disciplina),
+                                        Text('Avaliação Disponível'),
+                                        ElevatedButton(
+                                            style: ButtonStyle(
+                                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)))),
+                                            onPressed: () {
+                                              setState(() {
+                                                print('teste');
+                                              });
+                                            },
+                                            child: Text('Avaliar'))
+                                      ],
+                                    ),
                                 ]),
                               ),
                             )
