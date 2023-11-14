@@ -17,13 +17,13 @@ class HomePageState extends State<HomePage> {
   String _permissionSelector() {
     switch (_permission) {
       case 0:
-        return "Administrator";
+        return "Administrador";
       case 1:
-        return "Student";
+        return "Aluno";
       case 2:
         return "Professor";
       default:
-        return "Student";
+        return "Aluno";
     }
   }
 
@@ -72,9 +72,9 @@ class HomePageState extends State<HomePage> {
                       Center(
                         child: Column(
                           children: [
-                            Text('Hello, User!',
+                            Text('Olá, User!',
                                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white)),
-                            Text('Logged in as ${_permissionSelector()}',
+                            Text('Logado como ${_permissionSelector()}',
                                 style: TextStyle(fontWeight: FontWeight.w400, color: Colors.white)),
                           ],
                         ),
