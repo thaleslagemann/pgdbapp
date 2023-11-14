@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_unnecessary_containers, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_final_fields
 
 import 'package:flutter/material.dart';
-import 'package:pgdbapp/evaluation/evaluation_history.dart';
+import 'package:pgdbapp/evaluation/evaluation_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -108,7 +108,7 @@ class HomePageState extends State<HomePage> {
                             title: Text('Avaliação de aulas', style: TextStyle(color: Colors.black87)),
                             onTap: () {
                               setState(() {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));
                               });
                             },
                           ),
@@ -128,7 +128,7 @@ class HomePageState extends State<HomePage> {
                           title: Text('Aulas Avaliadas', style: TextStyle(color: Colors.black87)),
                           onTap: () {
                             setState(() {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationHistoryPage()));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));
                             });
                           },
                         ),
