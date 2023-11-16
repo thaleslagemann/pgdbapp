@@ -1,7 +1,9 @@
 // ignore_for_file: avoid_unnecessary_containers, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_final_fields
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pgdbapp/evaluation/evaluation_page.dart';
+import 'package:pgdbapp/login/login_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,6 +13,7 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _customTileExpanded = false;
   int _permission = 0;
 
@@ -72,10 +75,25 @@ class HomePageState extends State<HomePage> {
                       Center(
                         child: Column(
                           children: [
-                            Text('Olá, User!',
-                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white)),
+                            if (_auth.currentUser!.displayName == null)
+                              Text('Olá, User!',
+                                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white)),
+                            if (_auth.currentUser!.displayName != null)
+                              Text('Olá, ${_auth.currentUser!.displayName}!',
+                                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white)),
                             Text('Logado como ${_permissionSelector()}',
                                 style: TextStyle(fontWeight: FontWeight.w400, color: Colors.white)),
+                            Text(_auth.currentUser!.email!,
+                                style: TextStyle(fontWeight: FontWeight.w400, color: Colors.white)),
+                            TextButton(
+                              onPressed: (() {
+                                Navigator.of(context).pop();
+                                _auth.signOut();
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+                              }),
+                              child:
+                                  Text('Log out', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                            ),
                           ],
                         ),
                       ),

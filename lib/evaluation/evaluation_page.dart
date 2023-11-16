@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pgdbapp/evaluation/evaluation_form.dart';
 import 'evaluation.dart';
 
 class EvaluationPage extends StatefulWidget {
@@ -98,7 +99,18 @@ class EvaluationPageState extends State<EvaluationPage> {
                                                 print('teste');
                                               });
                                             },
-                                            child: Text('Avaliar'))
+                                            child: TextButton(
+                                                onPressed: (() {
+                                                  setState(() {
+                                                    Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                            builder: (context) => EvaluationForm(
+                                                                  evaluation: evaluation,
+                                                                )));
+                                                  });
+                                                }),
+                                                child: Text('Avaliar')))
                                       ],
                                     ),
                                 ]),
