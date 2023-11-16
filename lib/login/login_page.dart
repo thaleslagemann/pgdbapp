@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pgdbapp/register/register_page.dart';
 import '../home_page/home_page.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -16,30 +17,72 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login de Usuário'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'E-mail'),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Senha'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => _loginUser(context),
-              child: const Text('Login'),
-            ),
-          ],
+      body: SafeArea(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Colors.black, Colors.white]),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Log In',
+                        style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w800))),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6), boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 1,
+                      blurRadius: 4,
+                      offset: const Offset(0, 4), // changes position of shadow
+                    ),
+                  ]),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(labelText: 'E-mail'),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _passwordController,
+                        decoration: const InputDecoration(labelText: 'Senha'),
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () => _loginUser(context),
+                        child: const Text('Login'),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Não possui uma conta?'),
+                          TextButton(
+                              onPressed: (() {
+                                setState(() {
+                                  Navigator.push(
+                                      context, MaterialPageRoute(builder: (context) => const RegisterUserScreen()));
+                                });
+                              }),
+                              child: const Text('Registrar', style: TextStyle(color: Colors.deepPurple))),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -55,9 +98,7 @@ class LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  const HomePage()), // Substitua HomeScreen() pela tela desejada
+          MaterialPageRoute(builder: (context) => const HomePage()), // Substitua HomeScreen() pela tela desejada
         );
       }
 
