@@ -14,6 +14,12 @@ class Data extends ChangeNotifier {
     Evaluation(7, 201821179, 'ELC5561', 02, DateTime(2022, 10, 12), 0.0, '', false, false),
   ];
 
+  int _permission = 0;
+
+  int getUserPermission() {
+    return _permission;
+  }
+
   int getEvaluationIndex(Evaluation evaluation) {
     print(_aulas.indexWhere((x) => x.id == evaluation.id));
     return _aulas.indexWhere((x) => x.id == evaluation.id);

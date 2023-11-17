@@ -4,6 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pgdbapp/evaluation/evaluation_page.dart';
 import 'package:pgdbapp/login/login_page.dart';
+import 'package:provider/provider.dart';
+
+import '../evaluation/data.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,21 +20,23 @@ class HomePageState extends State<HomePage> {
   bool _customTileExpanded = false;
   int _permission = 0;
 
-  String _permissionSelector() {
-    switch (_permission) {
-      case 0:
-        return "Administrador";
-      case 1:
-        return "Aluno";
-      case 2:
-        return "Professor";
-      default:
-        return "Aluno";
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    var data = context.watch<Data>();
+
+    String _permissionSelector() {
+      switch (data.getUserPermission()) {
+        case 0:
+          return "Administrador";
+        case 1:
+          return "Aluno";
+        case 2:
+          return "Professor";
+        default:
+          return "Aluno";
+      }
+    }
+
     return Scaffold(
         body: SafeArea(
       child: Stack(children: [
@@ -118,7 +123,7 @@ class HomePageState extends State<HomePage> {
                         SizedBox(
                           height: 20,
                         ),
-                        if (_permission == 0 || _permission == 2)
+                        if (_permission != 1)
                           ListTile(
                             contentPadding: EdgeInsets.symmetric(horizontal: 10),
                             leading: Icon(Icons.star_half_rounded, color: Colors.black87),
@@ -128,7 +133,7 @@ class HomePageState extends State<HomePage> {
                               Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));
                             },
                           ),
-                        if (_permission == 0 || _permission == 2)
+                        if (_permission != 1)
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 30),
                             child: Divider(
