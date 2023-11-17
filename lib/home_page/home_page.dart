@@ -4,6 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pgdbapp/evaluation/evaluation_page.dart';
 import 'package:pgdbapp/login/login_page.dart';
+import 'package:provider/provider.dart';
+
+import '../evaluation/data.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,6 +35,7 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var data = context.watch<Data>();
     return Scaffold(
         body: SafeArea(
       child: Stack(children: [
@@ -66,7 +70,7 @@ class HomePageState extends State<HomePage> {
                           color: Colors.white,
                         ),
                         child: Icon(
-                          Icons.person_2,
+                          Icons.person_outline,
                           color: Colors.black,
                           size: 80,
                         ),
@@ -125,9 +129,7 @@ class HomePageState extends State<HomePage> {
                             trailing: Icon(Icons.keyboard_arrow_right, color: Colors.black87),
                             title: Text('Avaliação de aulas', style: TextStyle(color: Colors.black87)),
                             onTap: () {
-                              setState(() {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));
-                              });
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));
                             },
                           ),
                         if (_permission == 0 || _permission == 2)
