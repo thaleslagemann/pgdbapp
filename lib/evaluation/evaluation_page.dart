@@ -19,6 +19,10 @@ class EvaluationPageState extends State<EvaluationPage> {
   Widget build(BuildContext context) {
     var data = context.watch<Data>();
     var evaluations = data.getAulas();
+    bool _validate = true;
+    final TextEditingController _codigoDisciplinaController = TextEditingController();
+    final TextEditingController _numAulaController = TextEditingController();
+    DateTime _date = DateTime.now();
 
     Future<DateTime?> _invokeDatePicker() async {
       return await showDatePicker(
@@ -30,9 +34,6 @@ class EvaluationPageState extends State<EvaluationPage> {
     }
 
     Future<void> _displayClassInsertionDialog() async {
-      final TextEditingController _codigoDisciplinaController = TextEditingController();
-      final TextEditingController _numAulaController = TextEditingController();
-      DateTime _date = DateTime.now();
       return showDialog(
         context: context,
         builder: (context) {
@@ -65,6 +66,7 @@ class EvaluationPageState extends State<EvaluationPage> {
                                 hintText: 'ELC12345, MAT7654, ...',
                                 hintStyle: TextStyle(
                                     fontStyle: FontStyle.italic, color: Colors.grey, fontWeight: FontWeight.w400),
+                                errorText: _validate ? null : "Código Inexistente",
                               ),
                               textAlign: TextAlign.center,
                               controller: _codigoDisciplinaController,
@@ -129,10 +131,14 @@ class EvaluationPageState extends State<EvaluationPage> {
                           children: [
                             ElevatedButton(
                               onPressed: (() {
-                                () => setState(() {
-                                      data.addAula(Aula(id: 0, disciplina: '', aula: 1, data: DateTime.now()));
-                                      Navigator.of(context).pop();
-                                    });
+                                setState(() {
+                                  _validate = data.checkCodDisciplina(_codigoDisciplinaController.text);
+                                  print(_validate);
+                                  if (_validate) {
+                                    data.addAula(Aula(id: 0, disciplina: '', aula: 1, data: DateTime.now()));
+                                    Navigator.of(context).pop();
+                                  }
+                                });
                               }),
                               child: Text('Enviar'),
                             )
@@ -148,7 +154,7 @@ class EvaluationPageState extends State<EvaluationPage> {
     }
 
     Widget? _insertClassButton() {
-      if (data.getUserPermission() != 1) {
+      if (data.getUsuarioPermission() != 1) {
         return FloatingActionButton(
           foregroundColor: Colors.white,
           backgroundColor: Colors.deepPurple[300],

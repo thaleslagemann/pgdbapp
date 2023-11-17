@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pgdbapp/register/register_page.dart';
-import '../home_page/home_page.dart';
+import 'package:provider/provider.dart';
+import '../home/home_page.dart';
+import '../models/data.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,6 +19,30 @@ class LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var data = context.watch<Data>();
+
+    Future<void> _loginUser(BuildContext context) async {
+      try {
+        UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+
+        data.getUsuarioPermission();
+
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()), // Substitua HomeScreen() pela tela desejada
+          );
+        }
+
+        print('Usuário logado: ${userCredential.user!.uid}');
+      } catch (e) {
+        print('Erro no login: $e');
+      }
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -101,25 +127,5 @@ class LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _loginUser(BuildContext context) async {
-    try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()), // Substitua HomeScreen() pela tela desejada
-        );
-      }
-
-      print('Usuário logado: ${userCredential.user!.uid}');
-    } catch (e) {
-      print('Erro no login: $e');
-    }
   }
 }

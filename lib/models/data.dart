@@ -1,12 +1,40 @@
 // ignore_for_file: prefer_final_fields, avoid_print
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'disciplina.dart';
 import 'aula.dart';
 import 'evaluation.dart';
 import 'turma.dart';
+import 'usuario.dart';
 
 class Data extends ChangeNotifier {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  List<Usuario> _usuarios = [
+    Usuario(
+      id: 1,
+      matricula: 201821179,
+      email: 'thalesalaugustol@gmail.com',
+      nome: 'Thales Lagemann',
+      cargo: 1,
+    ),
+    Usuario(
+      id: 2,
+      matricula: 123456789,
+      email: 'admin@admin.com',
+      nome: 'Admin',
+      cargo: 0,
+    ),
+    Usuario(
+      id: 3,
+      matricula: 19891989,
+      email: 'professor@professor.com',
+      nome: 'Prof',
+      cargo: 2,
+    ),
+  ];
+
   List<Disciplina> _disciplinas = [
     Disciplina(codigo: 'ELC1071', nome: 'PROJETO E GERÊNCIA DE BANCO DE DADOS'),
     Disciplina(codigo: 'ELC137', nome: 'SISTEMAS DE INFORMACAO DISTRIBUIDOS "A"'),
@@ -15,7 +43,9 @@ class Data extends ChangeNotifier {
     Disciplina(codigo: 'EDE1131', nome: 'LIBRAS: BACHARELADO'),
   ];
 
-  List<Turma> _turmas = [];
+  List<Turma> _turmas = [
+    Turma(id: 1, disciplina: 'ELC1071', matProfessor: 123456789, matAlunos: [201821179, 123456789, 000000000])
+  ];
 
   List<Aula> _aulas = [];
 
@@ -29,10 +59,27 @@ class Data extends ChangeNotifier {
     Evaluation(7, 201821179, 'ELC5561', 02, DateTime(2022, 10, 12), 0.0, '', false, false),
   ];
 
-  int _permission = 1;
+  late int _permission;
 
-  int getUserPermission() {
+  int getUsuarioPermission() {
+    for (var usuario in _usuarios) {
+      if (_auth.currentUser!.email == usuario.email) {
+        _permission = usuario.cargo;
+      }
+    }
     return _permission;
+  }
+
+  void createEvaluationForStudents(Aula aula) {
+    for (var turma in _turmas) {
+      if (turma.disciplina == aula.disciplina) {
+        for (var aluno in turma.matAlunos) {
+          addEvaluation(
+              Evaluation(findNextEvaluationId(0), aluno, aula.disciplina, aula.aula, aula.data, 0.0, '', false, true));
+        }
+      }
+    }
+    notifyListeners();
   }
 
   int getEvaluationIndex(Evaluation evaluation) {
@@ -46,10 +93,12 @@ class Data extends ChangeNotifier {
 
   void addTurma(Turma turma) {
     _turmas.add(turma);
+    notifyListeners();
   }
 
   void removeTurma(int index) {
     _turmas.removeAt(index);
+    notifyListeners();
   }
 
   bool containsTurma(elementToCheck) {
@@ -72,16 +121,27 @@ class Data extends ChangeNotifier {
 
   void addDisciplina(Disciplina disciplina) {
     _disciplinas.add(disciplina);
+    notifyListeners();
   }
 
   void removeDisciplina(int index) {
     _disciplinas.removeAt(index);
+    notifyListeners();
   }
 
   bool containsDisciplina(elementToCheck) {
     List<dynamic> list = _disciplinas;
     for (var element in list) {
       if (element.id == elementToCheck) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool checkCodDisciplina(String cod) {
+    for (var disc in _disciplinas) {
+      if (disc.codigo == cod) {
         return true;
       }
     }
@@ -98,10 +158,13 @@ class Data extends ChangeNotifier {
 
   void addAula(Aula aula) {
     _aulas.add(aula);
+    createEvaluationForStudents(aula);
+    notifyListeners();
   }
 
   void removeAula(int index) {
     _aulas.removeAt(index);
+    notifyListeners();
   }
 
   bool containsAula(elementToCheck) {

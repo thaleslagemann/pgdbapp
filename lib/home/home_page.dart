@@ -25,7 +25,7 @@ class HomePageState extends State<HomePage> {
     var data = context.watch<Data>();
 
     String _permissionSelector() {
-      switch (data.getUserPermission()) {
+      switch (data.getUsuarioPermission()) {
         case 0:
           return "Administrador";
         case 1:
