@@ -14,11 +14,12 @@ class EvaluationPage extends StatefulWidget {
 
 class EvaluationPageState extends State<EvaluationPage> {
   List<Evaluation> aulasAvaliadas = [
-    Evaluation(201821179, 'ELC1071', 01, DateTime(2023, 1, 1), 10.0, 'boa aula do professor', true),
-    Evaluation(201821179, 'EDE1131', 02, DateTime(2023, 1, 1), 0.0, '', false),
-    Evaluation(201821179, 'ELC137', 03, DateTime(2023, 1, 1), 8.0, 'boa aula da professora', true),
-    Evaluation(201821179, 'MAT1123', 04, DateTime(2023, 1, 1), 9.0, 'boa aula da professora', true),
-    Evaluation(201821179, 'DPADI0185', 05, DateTime(2023, 1, 1), 10.0, 'boa aula da professora', true),
+    Evaluation(1, 201821179, 'ELC1071', 01, DateTime(2023, 1, 1), 10.0, 'boa aula do professor', true),
+    Evaluation(2, 201821179, 'EDE1131', 02, DateTime(2023, 1, 1), 0.0, '', false),
+    Evaluation(3, 201821179, 'ELC137', 03, DateTime(2023, 1, 1), 8.0, 'boa aula da professora', true),
+    Evaluation(4, 201821179, 'MAT1123', 04, DateTime(2023, 1, 1), 9.0, 'boa aula da professora', true),
+    Evaluation(5, 201821179, 'DPADI0185', 05, DateTime(2023, 1, 1), 10.0, 'boa aula da professora', true),
+    Evaluation(6, 201821179, 'DPADI0155', 05, DateTime(2023, 1, 2), 2.0, 'uma bosta', true),
   ];
 
   @override
@@ -94,13 +95,7 @@ class EvaluationPageState extends State<EvaluationPage> {
                                             style: ButtonStyle(
                                                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                                                     RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)))),
-                                            onPressed: () {
-                                              setState(() {
-                                                print('teste');
-                                              });
-                                            },
-                                            child: TextButton(
-                                                onPressed: (() {
+                                            onPressed: (() {
                                                   setState(() {
                                                     Navigator.push(
                                                         context,
@@ -110,7 +105,7 @@ class EvaluationPageState extends State<EvaluationPage> {
                                                                 )));
                                                   });
                                                 }),
-                                                child: Text('Avaliar')))
+                                                child: Text('Avaliar'))
                                       ],
                                     ),
                                 ]),
@@ -127,5 +122,10 @@ class EvaluationPageState extends State<EvaluationPage> {
         )
       ]),
     );
+  }
+
+  int getEvaluationIndex(Evaluation evaluation) {
+    print(aulasAvaliadas.indexWhere((x) => x.id == evaluation.id));
+    return aulasAvaliadas.indexWhere((x) => x.id == evaluation.id);
   }
 }

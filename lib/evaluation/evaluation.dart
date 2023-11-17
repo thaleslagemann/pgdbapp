@@ -1,6 +1,7 @@
 class Evaluation {
-  Evaluation(this.matricula, this.disciplina, this.aula, this.data, this.nota, this.comentario, this.evaluated);
+  Evaluation(this.id, this.matricula, this.disciplina, this.aula, this.data, this.nota, this.comentario, this.evaluated);
 
+  final int id;
   final int matricula;
   final String disciplina;
   final int aula;

@@ -36,7 +36,7 @@ class HomePageState extends State<HomePage> {
         body: SafeArea(
       child: Stack(children: [
         Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
@@ -66,7 +66,7 @@ class HomePageState extends State<HomePage> {
                           color: Colors.white,
                         ),
                         child: Icon(
-                          Icons.person_outline,
+                          Icons.person_2,
                           color: Colors.black,
                           size: 80,
                         ),

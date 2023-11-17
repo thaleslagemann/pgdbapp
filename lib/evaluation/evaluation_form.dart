@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'evaluation_page.dart';
 import 'evaluation.dart';
 
 class EvaluationForm extends StatefulWidget {
@@ -13,8 +14,9 @@ class EvaluationForm extends StatefulWidget {
 }
 
 class EvaluationFormState extends State<EvaluationForm> {
+  final EvaluationPageState evaluationPage = EvaluationPageState();
   final TextEditingController _comentarioController = TextEditingController();
-  int _nota = 0;
+  double _nota = 0;
 
   Icon _isFilled(int starNumber) {
     if (_nota >= starNumber) {
@@ -91,6 +93,7 @@ class EvaluationFormState extends State<EvaluationForm> {
                                     icon: _isFilled(1),
                                     splashColor: Colors.transparent,
                                     highlightColor: Colors.transparent,
+                                    hoverColor: Colors.transparent,
                                     onPressed: (() {
                                       setState(() => _nota = 1);
                                     }),
@@ -241,9 +244,16 @@ class EvaluationFormState extends State<EvaluationForm> {
                               children: [
                                 ElevatedButton(
                                   onPressed: (() {
-                                    setState(() {
-                                      print('Enviado');
-                                    });
+                                    if(_nota != 0) {
+                                      setState(() {
+                                        setFormResults(widget.evaluation);
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => const EvaluationPage()), // Substitua HomeScreen() pela tela desejada
+                                        );
+                                        print('Enviado');
+                                      });
+                                    }
                                   }),
                                   child: Text('Enviar'),
                                 )
@@ -261,5 +271,12 @@ class EvaluationFormState extends State<EvaluationForm> {
         ),
       ),
     );
+  }
+  
+  void setFormResults(Evaluation e) {
+    int index = evaluationPage.getEvaluationIndex(e);
+
+    Evaluation newEvaluation = Evaluation(e.id, e.matricula, e.disciplina, e.aula, e.data, _nota, _comentarioController.text, true);
+    evaluationPage.aulasAvaliadas[index] = newEvaluation;
   }
 }
