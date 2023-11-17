@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:pgdbapp/evaluation/evaluation_page.dart';
+import 'package:pgdbapp/report/reporting_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -179,7 +180,9 @@ class HomePageState extends State<HomePage> {
                                           textAlign: TextAlign.start,
                                         ),
                                         onTap: () {
-                                          setState(() {});
+                                          setState(() {
+                                            Navigator.push(context, MaterialPageRoute(builder: (context) => ReportingPage()));
+                                          });
                                         },
                                       ),
                                     ),
