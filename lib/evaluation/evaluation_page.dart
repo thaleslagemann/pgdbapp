@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'aula.dart';
 import 'data.dart';
 import 'evaluation.dart';
 
@@ -113,7 +114,7 @@ class EvaluationPageState extends State<EvaluationPage> {
                           IconButton(
                               iconSize: 24,
                               onPressed: (() async {
-                                DateTime? selectedDate = await _invokeDatePicker()!;
+                                DateTime? selectedDate = await _invokeDatePicker();
                                 setState(() {
                                   _date = selectedDate!;
                                 });
@@ -127,7 +128,9 @@ class EvaluationPageState extends State<EvaluationPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ElevatedButton(
-                              onPressed: (() {}),
+                              onPressed: (() {
+                                data.addClass(Aula(id: 0, disciplina: '', aula: 1, data: DateTime.now()));
+                              }),
                               child: Text('Enviar'),
                             )
                           ],
@@ -156,7 +159,7 @@ class EvaluationPageState extends State<EvaluationPage> {
       }
     }
 
-    Future<void> _displayEvaluationPopUp(Evaluation e) async {
+    Future<void> _displayEvaluationDialog(Evaluation e) async {
       final TextEditingController _comentarioController = TextEditingController();
       double _nota = 0;
 
@@ -387,7 +390,7 @@ class EvaluationPageState extends State<EvaluationPage> {
                           ElevatedButton(
                             onPressed: (() {
                               if (_nota != 0) {
-                                data.updateEvaluation([_nota, _comentarioController.text], e);
+                                data.executeEvaluation([_nota, _comentarioController.text], e);
                                 Navigator.of(context).pop();
                                 print('Enviado');
                                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -507,7 +510,7 @@ class EvaluationPageState extends State<EvaluationPage> {
                                                       RoundedRectangleBorder(
                                                           borderRadius: BorderRadius.circular(10.0)))),
                                               onPressed: (() {
-                                                _displayEvaluationPopUp(evaluation);
+                                                _displayEvaluationDialog(evaluation);
                                               }),
                                               child: Text('Avaliar'))
                                         ],
