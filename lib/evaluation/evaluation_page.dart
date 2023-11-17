@@ -129,7 +129,10 @@ class EvaluationPageState extends State<EvaluationPage> {
                           children: [
                             ElevatedButton(
                               onPressed: (() {
-                                data.addClass(Aula(id: 0, disciplina: '', aula: 1, data: DateTime.now()));
+                                () => setState(() {
+                                      data.addAula(Aula(id: 0, disciplina: '', aula: 1, data: DateTime.now()));
+                                      Navigator.of(context).pop();
+                                    });
                               }),
                               child: Text('Enviar'),
                             )
