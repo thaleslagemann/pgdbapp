@@ -6,7 +6,7 @@ import 'package:pgdbapp/evaluation/evaluation_page.dart';
 import 'package:pgdbapp/login/login_page.dart';
 import 'package:provider/provider.dart';
 
-import '../evaluation/data.dart';
+import '../models/data.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

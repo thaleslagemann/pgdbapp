@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'aula.dart';
-import 'data.dart';
-import 'evaluation.dart';
+import '../models/aula.dart';
+import '../models/data.dart';
+import '../models/evaluation.dart';
 
 class EvaluationPage extends StatefulWidget {
   const EvaluationPage({super.key});
