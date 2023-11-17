@@ -13,6 +13,7 @@ class LoginScreenState extends State<LoginScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _hidePass = true;
 
   @override
   Widget build(BuildContext context) {
@@ -53,10 +54,24 @@ class LoginScreenState extends State<LoginScreen> {
                         decoration: const InputDecoration(labelText: 'E-mail'),
                       ),
                       const SizedBox(height: 10),
-                      TextField(
-                        controller: _passwordController,
-                        decoration: const InputDecoration(labelText: 'Senha'),
-                        obscureText: true,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: TextField(
+                                controller: _passwordController,
+                                decoration: const InputDecoration(labelText: 'Senha'),
+                                obscureText: _hidePass,
+                                onSubmitted: ((value) {
+                                  _loginUser(context);
+                                })),
+                          ),
+                          IconButton(
+                              icon: const Icon(Icons.remove_red_eye_outlined),
+                              onPressed: () => setState(() {
+                                    _hidePass = !_hidePass;
+                                  }))
+                        ],
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(

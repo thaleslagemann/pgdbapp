@@ -4,9 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pgdbapp/evaluation/evaluation_page.dart';
 import 'package:pgdbapp/login/login_page.dart';
-import 'package:provider/provider.dart';
-
-import '../evaluation/data.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -35,7 +32,6 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    var data = context.watch<Data>();
     return Scaffold(
         body: SafeArea(
       child: Stack(children: [
