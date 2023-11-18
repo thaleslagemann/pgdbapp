@@ -10,26 +10,17 @@ class ReportingPage extends StatefulWidget {
 
 class ReportingPageState extends State<ReportingPage> {
   List<Report> relatorios = [
-    Report('ELC1071', DateTime(2023, 1, 1), 10.0),
+    Report('ELC1071', DateTime(2023, 1, 1), 5.0),
     Report('EDE1131', DateTime(2023, 1, 1), 0.0),
     Report('ELC137', DateTime(2023, 1, 1), 8.0),
     Report('MAT1123', DateTime(2023, 1, 1), 9.0),
     Report('DPADI0185', DateTime(2023, 1, 1), 10.0),
   ];
 
-  double calcularMedia() {
-    if (relatorios.isEmpty) return 0.0;
-
-    double soma = 0.0;
-    for (var relatorio in relatorios) {
-      soma += relatorio.nota;
-    }
-
-    return soma / relatorios.length;
-  }
-
   @override
   Widget build(BuildContext context) {
+    double media = calcularMediaMensal(relatorios, 2023, 1);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -81,7 +72,7 @@ class ReportingPageState extends State<ReportingPage> {
                   ),
                   child: Center(
                       child: Text(
-                        '${calcularMedia().toStringAsFixed(1)}',
+                        '${media.toStringAsFixed(1)}',
                         style: TextStyle(
                           fontSize: 20.0,
                           fontWeight: FontWeight.bold,
@@ -113,7 +104,7 @@ class ReportingPageState extends State<ReportingPage> {
                     child: Align(
                       alignment: Alignment.center,
                       child: Text(
-                        calcularMedia() > 7.0
+                        media > 7.0
                         ? 'Healthy'
                         : 'Sick',
                         style: TextStyle(
