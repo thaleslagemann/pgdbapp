@@ -53,18 +53,23 @@ class ReportingPageState extends State<ReportingPage> {
           children: [
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Padding(padding: EdgeInsets.only(top: 20.0)),
               Text('Relatório', style: TextStyle(fontSize: 18.0)),
-              //SizedBox(height: 10.0),
               Divider(
                   height: 0,
                   color: Colors.black54,
                   thickness: 0.5,
               ),
-              Text('A média é:'),
-              Container(
+              Padding(
+                padding: EdgeInsets.fromLTRB(10, 0, 300, 0),
+                child: Text('A média é:'),
+              ),
+             Padding(
+                padding: EdgeInsets.fromLTRB(0, 60, 0, 60),
+                child:
+                Container(
                   width: 100.0,
                   height: 100.0,
                   decoration: BoxDecoration(
@@ -73,7 +78,6 @@ class ReportingPageState extends State<ReportingPage> {
                       width: 2.0  
                     ),
                     shape: BoxShape.circle,  
-                    
                   ),
                   child: Center(
                       child: Text(
@@ -86,8 +90,15 @@ class ReportingPageState extends State<ReportingPage> {
                       ),
                   ),
                 ),
-              Text('A aula está:'),
-              Container(
+              ),        
+              Padding(
+                padding: EdgeInsets.fromLTRB(10, 0, 300, 0),
+                child: Text('A aula está:'),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(0, 60, 0, 60),
+                child:
+                Container(
                   width: 100.0,
                   height: 100.0,
                   decoration: BoxDecoration(
@@ -113,9 +124,9 @@ class ReportingPageState extends State<ReportingPage> {
                       )
                     )
                   ), 
-                ),
-              ]),
-          ]),
-        );
+              )),
+            ]),
+        ]),
+    );
   }
 }
