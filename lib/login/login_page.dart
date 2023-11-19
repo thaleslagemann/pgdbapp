@@ -20,22 +20,25 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     var data = context.watch<Data>();
-
     Future<void> _loginUser(BuildContext context) async {
       try {
-        UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        UserCredential userCredential = await _auth
+            .signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
-        );
-
-        data.getUsuarioPermission();
-
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()), // Substitua HomeScreen() pela tela desejada
-          );
-        }
+        )
+            .then((value) async {
+          print('teste');
+          await data.setUser().then((value) {
+            if (mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()), // Substitua HomeScreen() pela tela desejada
+              );
+            }
+          });
+          return value;
+        });
 
         print('Usuário logado: ${userCredential.user!.uid}');
       } catch (e) {

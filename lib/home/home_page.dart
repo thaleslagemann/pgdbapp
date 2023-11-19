@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_unnecessary_containers, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_final_fields
+// ignore_for_file: avoid_unnecessary_containers, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_final_fields, unnecessary_null_comparison, no_leading_underscores_for_local_identifiers
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -25,15 +25,19 @@ class HomePageState extends State<HomePage> {
     var data = context.watch<Data>();
 
     String _permissionSelector() {
-      switch (data.getUsuarioPermission()) {
-        case 0:
-          return "Administrador";
-        case 1:
-          return "Aluno";
-        case 2:
-          return "Professor";
-        default:
-          return "Aluno";
+      if (data.usuarioLogado()) {
+        switch (data.getCurrentUsuario()!.cargo) {
+          case 0:
+            return "Administrador";
+          case 1:
+            return "Aluno";
+          case 2:
+            return "Professor";
+          default:
+            return "Aluno";
+        }
+      } else {
+        return 'null';
       }
     }
 
@@ -80,20 +84,23 @@ class HomePageState extends State<HomePage> {
                       Center(
                         child: Column(
                           children: [
-                            if (_auth.currentUser!.displayName == null)
+                            if (!data.usuarioLogado())
                               Text('Olá, User!',
                                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white)),
-                            if (_auth.currentUser!.displayName != null)
-                              Text('Olá, ${_auth.currentUser!.displayName}!',
+                            if (data.usuarioLogado())
+                              Text('Olá, ${data.getCurrentUsuario()!.nome}!',
                                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white)),
-                            Text('Logado como ${_permissionSelector()}',
-                                style: TextStyle(fontWeight: FontWeight.w400, color: Colors.white)),
-                            Text(_auth.currentUser!.email!,
-                                style: TextStyle(fontWeight: FontWeight.w400, color: Colors.white)),
+                            if (data.usuarioLogado())
+                              Text('Logado como ${_permissionSelector()}',
+                                  style: TextStyle(fontWeight: FontWeight.w400, color: Colors.white)),
+                            if (data.usuarioLogado())
+                              Text(_auth.currentUser!.email!,
+                                  style: TextStyle(fontWeight: FontWeight.w400, color: Colors.white)),
                             TextButton(
                               onPressed: (() {
                                 Navigator.of(context).pop();
                                 _auth.signOut();
+                                data.userLogout();
                                 Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
                               }),
                               child:

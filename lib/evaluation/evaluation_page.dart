@@ -135,7 +135,11 @@ class EvaluationPageState extends State<EvaluationPage> {
                                   _validate = data.checkCodDisciplina(_codigoDisciplinaController.text);
                                   print(_validate);
                                   if (_validate) {
-                                    data.addAula(Aula(id: 0, disciplina: '', aula: 1, data: DateTime.now()));
+                                    data.addNewAula(Aula(
+                                        id: data.findNextAulaId(0),
+                                        disciplina: _codigoDisciplinaController.text,
+                                        aula: int.parse(_numAulaController.text),
+                                        data: _date));
                                     Navigator.of(context).pop();
                                   }
                                 });
@@ -422,6 +426,7 @@ class EvaluationPageState extends State<EvaluationPage> {
       );
     }
 
+    print(data.getCurrentUsuario()!.matricula);
     return Scaffold(
       floatingActionButton: _insertClassButton(),
       appBar: AppBar(
@@ -457,89 +462,90 @@ class EvaluationPageState extends State<EvaluationPage> {
                         children: [
                           SizedBox(height: 15),
                           for (var evaluation in evaluations)
-                            Consumer<Data>(builder: (context, cart, child) {
-                              return ListTile(
-                                title: Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 60),
-                                  padding: EdgeInsets.symmetric(vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    //border: Border.all(color: Colors.black, width: 1),
-                                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5),
-                                        spreadRadius: 1,
-                                        blurRadius: 4,
-                                        offset: Offset(0, 4), // changes position of shadow
-                                      ),
-                                    ],
+                            if (evaluation.matricula == data.getCurrentUsuario()!.matricula)
+                              Consumer<Data>(builder: (context, cart, child) {
+                                return ListTile(
+                                  title: Container(
+                                    margin: EdgeInsets.symmetric(horizontal: 60),
+                                    padding: EdgeInsets.symmetric(vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      //border: Border.all(color: Colors.black, width: 1),
+                                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          spreadRadius: 1,
+                                          blurRadius: 4,
+                                          offset: Offset(0, 4), // changes position of shadow
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(children: [
+                                      if (evaluation.evaluated == true)
+                                        Column(
+                                          children: [
+                                            Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
+                                                style: TextStyle(fontSize: 10)),
+                                            Text(evaluation.disciplina,
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.star,
+                                                  size: 20,
+                                                  color: Colors.yellow[700],
+                                                ),
+                                                Text(evaluation.nota.toStringAsFixed(1),
+                                                    style: TextStyle(fontWeight: FontWeight.w700)),
+                                              ],
+                                            ),
+                                            Text(
+                                              "\"${evaluation.comentario}\"",
+                                              style: TextStyle(fontSize: 12),
+                                              softWrap: true,
+                                            ),
+                                          ],
+                                        ),
+                                      if (evaluation.evaluated == false && evaluation.evaluationAvailable == true)
+                                        Column(
+                                          children: [
+                                            Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
+                                                style: TextStyle(fontSize: 10)),
+                                            Text(evaluation.disciplina,
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Text('Avaliação Disponível', style: TextStyle(color: Colors.green[300])),
+                                            ElevatedButton(
+                                                style: ButtonStyle(
+                                                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                                        RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.circular(10.0)))),
+                                                onPressed: (() {
+                                                  _displayEvaluationDialog(evaluation);
+                                                }),
+                                                child: Text('Avaliar'))
+                                          ],
+                                        ),
+                                      if (evaluation.evaluated == false && evaluation.evaluationAvailable == false)
+                                        Column(
+                                          children: [
+                                            Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
+                                                style: TextStyle(fontSize: 10)),
+                                            Text(evaluation.disciplina,
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Text('Aluno ausente', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                                            Text('Avaliação Indisponível', style: TextStyle(color: Colors.red[400])),
+                                          ],
+                                        ),
+                                    ]),
                                   ),
-                                  child: Column(children: [
-                                    if (evaluation.evaluated == true)
-                                      Column(
-                                        children: [
-                                          Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
-                                              style: TextStyle(fontSize: 10)),
-                                          Text(evaluation.disciplina,
-                                              style: TextStyle(
-                                                  fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              Icon(
-                                                Icons.star,
-                                                size: 20,
-                                                color: Colors.yellow[700],
-                                              ),
-                                              Text(evaluation.nota.toStringAsFixed(1),
-                                                  style: TextStyle(fontWeight: FontWeight.w700)),
-                                            ],
-                                          ),
-                                          Text(
-                                            "\"${evaluation.comentario}\"",
-                                            style: TextStyle(fontSize: 12),
-                                            softWrap: true,
-                                          ),
-                                        ],
-                                      ),
-                                    if (evaluation.evaluated == false && evaluation.evaluationAvailable == true)
-                                      Column(
-                                        children: [
-                                          Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
-                                              style: TextStyle(fontSize: 10)),
-                                          Text(evaluation.disciplina,
-                                              style: TextStyle(
-                                                  fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
-                                          Text('Avaliação Disponível', style: TextStyle(color: Colors.green[300])),
-                                          ElevatedButton(
-                                              style: ButtonStyle(
-                                                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                                      RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(10.0)))),
-                                              onPressed: (() {
-                                                _displayEvaluationDialog(evaluation);
-                                              }),
-                                              child: Text('Avaliar'))
-                                        ],
-                                      ),
-                                    if (evaluation.evaluated == false && evaluation.evaluationAvailable == false)
-                                      Column(
-                                        children: [
-                                          Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
-                                              style: TextStyle(fontSize: 10)),
-                                          Text(evaluation.disciplina,
-                                              style: TextStyle(
-                                                  fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
-                                          Text('Aluno ausente', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                                          Text('Avaliação Indisponível', style: TextStyle(color: Colors.red[400])),
-                                        ],
-                                      ),
-                                  ]),
-                                ),
-                              );
-                            })
+                                );
+                              })
                         ],
                       ),
                     )
