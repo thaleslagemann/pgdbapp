@@ -1,8 +1,11 @@
-// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers
+// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, no_leading_underscores_for_local_identifiers, must_be_immutable
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'evaluation.dart';
+import 'package:provider/provider.dart';
+import '../models/aula.dart';
+import '../models/data.dart';
+import '../models/evaluation.dart';
 
 class EvaluationPage extends StatefulWidget {
   const EvaluationPage({super.key});
@@ -12,17 +15,420 @@ class EvaluationPage extends StatefulWidget {
 }
 
 class EvaluationPageState extends State<EvaluationPage> {
-  List<Evaluation> aulasAvaliadas = [
-    Evaluation(201821179, 'ELC1071', 01, DateTime(2023, 1, 1), 10.0, 'boa aula do professor', true),
-    Evaluation(201821179, 'EDE1131', 02, DateTime(2023, 1, 1), 0.0, '', false),
-    Evaluation(201821179, 'ELC137', 03, DateTime(2023, 1, 1), 8.0, 'boa aula da professora', true),
-    Evaluation(201821179, 'MAT1123', 04, DateTime(2023, 1, 1), 9.0, 'boa aula da professora', true),
-    Evaluation(201821179, 'DPADI0185', 05, DateTime(2023, 1, 1), 10.0, 'boa aula da professora', true),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    var data = context.watch<Data>();
+    var evaluations = data.getAulas();
+    bool _validate = true;
+    final TextEditingController _codigoDisciplinaController = TextEditingController();
+    final TextEditingController _numAulaController = TextEditingController();
+    DateTime _date = DateTime.now();
+
+    Future<DateTime?> _invokeDatePicker() async {
+      return await showDatePicker(
+          keyboardType: TextInputType.number,
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(1989, 1, 1),
+          lastDate: DateTime(2189, 1, 1));
+    }
+
+    Future<void> _displayClassInsertionDialog() async {
+      return showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                  title: Center(child: const Text('Nova Aula')),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text(
+                            'Código da Disciplina:',
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'ELC12345, MAT7654, ...',
+                                hintStyle: TextStyle(
+                                    fontStyle: FontStyle.italic, color: Colors.grey, fontWeight: FontWeight.w400),
+                                errorText: _validate ? null : "Código Inexistente",
+                              ),
+                              textAlign: TextAlign.center,
+                              controller: _codigoDisciplinaController,
+                            ),
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [Text('Número da Aula:')],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: '1, 2, 3, ...',
+                                hintStyle: TextStyle(
+                                    fontStyle: FontStyle.italic, color: Colors.grey, fontWeight: FontWeight.w400),
+                              ),
+                              textAlign: TextAlign.center,
+                              keyboardType: TextInputType.number,
+                              controller: _numAulaController,
+                            ),
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [Text('Data:')],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            (DateFormat('dd/MM/yyyy').format(_date)),
+                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                              iconSize: 24,
+                              onPressed: (() async {
+                                DateTime? selectedDate = await _invokeDatePicker();
+                                setState(() {
+                                  _date = selectedDate!;
+                                });
+                              }),
+                              icon: Icon(Icons.calendar_month_outlined))
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20.0, bottom: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: (() {
+                                setState(() {
+                                  _validate = data.checkCodDisciplina(_codigoDisciplinaController.text);
+                                  print(_validate);
+                                  if (_validate) {
+                                    data.addNewAula(Aula(
+                                        id: data.findNextAulaId(0),
+                                        disciplina: _codigoDisciplinaController.text,
+                                        aula: int.parse(_numAulaController.text),
+                                        data: _date));
+                                    Navigator.of(context).pop();
+                                  }
+                                });
+                              }),
+                              child: Text('Enviar'),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ));
+            },
+          );
+        },
+      );
+    }
+
+    Widget? _insertClassButton() {
+      if (data.getUsuarioPermission() != 1) {
+        return FloatingActionButton(
+          foregroundColor: Colors.white,
+          backgroundColor: Colors.deepPurple[300],
+          onPressed: (() {
+            _displayClassInsertionDialog();
+          }),
+          child: Icon(Icons.post_add, size: 30, color: Colors.white),
+        );
+      } else {
+        return SizedBox();
+      }
+    }
+
+    Future<void> _displayEvaluationDialog(Evaluation e) async {
+      final TextEditingController _comentarioController = TextEditingController();
+      double _nota = 0;
+
+      Icon _isFilled(int starNumber) {
+        if (_nota >= starNumber) {
+          return Icon(Icons.star, color: Colors.yellow[700]);
+        } else {
+          return Icon(Icons.star_border, color: Colors.grey);
+        }
+      }
+
+      return showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                title: Center(child: const Text('Avaliar aula')),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(DateFormat('dd/MM/yyyy').format(e.data)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(e.disciplina),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          child: IconButton(
+                            key: Key('star1'),
+                            icon: _isFilled(1),
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.center,
+                            visualDensity: VisualDensity(),
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            onPressed: (() {
+                              setState(() => _nota = 1);
+                            }),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20,
+                          child: IconButton(
+                            key: Key('star2'),
+                            icon: _isFilled(2),
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.center,
+                            visualDensity: VisualDensity(),
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onPressed: (() {
+                              setState(() => _nota = 2);
+                            }),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20,
+                          child: IconButton(
+                            key: Key('star3'),
+                            icon: _isFilled(3),
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.center,
+                            visualDensity: VisualDensity(),
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onPressed: (() {
+                              setState(() => _nota = 3);
+                            }),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20,
+                          child: IconButton(
+                            key: Key('star4'),
+                            icon: _isFilled(4),
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.center,
+                            visualDensity: VisualDensity(),
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onPressed: (() {
+                              setState(() => _nota = 4);
+                            }),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20,
+                          child: IconButton(
+                            key: Key('star5'),
+                            icon: _isFilled(5),
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.center,
+                            visualDensity: VisualDensity(),
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onPressed: (() {
+                              setState(() => _nota = 5);
+                            }),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20,
+                          child: IconButton(
+                            key: Key('star6'),
+                            icon: _isFilled(6),
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.center,
+                            visualDensity: VisualDensity(),
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onPressed: (() {
+                              setState(() => _nota = 6);
+                            }),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20,
+                          child: IconButton(
+                            key: Key('star7'),
+                            icon: _isFilled(7),
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.center,
+                            visualDensity: VisualDensity(),
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onPressed: (() {
+                              setState(() => _nota = 7);
+                            }),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20,
+                          child: IconButton(
+                            key: Key('star8'),
+                            icon: _isFilled(8),
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.center,
+                            visualDensity: VisualDensity(),
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onPressed: (() {
+                              setState(() => _nota = 8);
+                            }),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20,
+                          child: IconButton(
+                            key: Key('star9'),
+                            icon: _isFilled(9),
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.center,
+                            visualDensity: VisualDensity(),
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onPressed: (() {
+                              setState(() => _nota = 9);
+                            }),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20,
+                          child: IconButton(
+                            key: Key('star10'),
+                            icon: _isFilled(10),
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.center,
+                            visualDensity: VisualDensity(),
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onPressed: (() {
+                              setState(() => _nota = 10);
+                            }),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _nota.toString(),
+                          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 24),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text('Comentário:'),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: TextField(
+                            controller: _comentarioController,
+                            minLines: 1,
+                            maxLines: 8,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0, bottom: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: (() {
+                              if (_nota != 0) {
+                                data.executeEvaluation([_nota, _comentarioController.text], e);
+                                Navigator.of(context).pop();
+                                print('Enviado');
+                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Avaliação realizada!')),
+                                );
+                              }
+                            }),
+                            child: Text('Enviar'),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
+
+    print(data.getCurrentUsuario()!.matricula);
     return Scaffold(
+      floatingActionButton: _insertClassButton(),
       appBar: AppBar(
         title: Text(
           'Aulas',
@@ -55,55 +461,91 @@ class EvaluationPageState extends State<EvaluationPage> {
                       child: ListView(
                         children: [
                           SizedBox(height: 15),
-                          for (var evaluation in aulasAvaliadas)
-                            ListTile(
-                              title: Container(
-                                margin: EdgeInsets.symmetric(horizontal: 60),
-                                padding: EdgeInsets.symmetric(vertical: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  //border: Border.all(color: Colors.black, width: 1),
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 1,
-                                      blurRadius: 4,
-                                      offset: Offset(0, 4), // changes position of shadow
-                                    ),
-                                  ],
-                                ),
-                                child: Column(children: [
-                                  if (evaluation.evaluated == true)
-                                    Column(
-                                      children: [
-                                        Text(DateFormat('dd/MM/yyyy').format(evaluation.data)),
-                                        Text(evaluation.disciplina),
-                                        Text(evaluation.nota.toStringAsFixed(2)),
-                                        Text("\"${evaluation.comentario}\"", style: TextStyle(fontSize: 12)),
+                          for (var evaluation in evaluations)
+                            if (evaluation.matricula == data.getCurrentUsuario()!.matricula)
+                              Consumer<Data>(builder: (context, cart, child) {
+                                return ListTile(
+                                  title: Container(
+                                    margin: EdgeInsets.symmetric(horizontal: 60),
+                                    padding: EdgeInsets.symmetric(vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      //border: Border.all(color: Colors.black, width: 1),
+                                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          spreadRadius: 1,
+                                          blurRadius: 4,
+                                          offset: Offset(0, 4), // changes position of shadow
+                                        ),
                                       ],
                                     ),
-                                  if (evaluation.evaluated == false)
-                                    Column(
-                                      children: [
-                                        Text(DateFormat('dd/MM/yyyy').format(evaluation.data)),
-                                        Text(evaluation.disciplina),
-                                        Text('Avaliação Disponível'),
-                                        ElevatedButton(
-                                            style: ButtonStyle(
-                                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)))),
-                                            onPressed: () {
-                                              setState(() {
-                                                print('teste');
-                                              });
-                                            },
-                                            child: Text('Avaliar'))
-                                      ],
-                                    ),
-                                ]),
-                              ),
-                            )
+                                    child: Column(children: [
+                                      if (evaluation.evaluated == true)
+                                        Column(
+                                          children: [
+                                            Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
+                                                style: TextStyle(fontSize: 10)),
+                                            Text(evaluation.disciplina,
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.star,
+                                                  size: 20,
+                                                  color: Colors.yellow[700],
+                                                ),
+                                                Text(evaluation.nota.toStringAsFixed(1),
+                                                    style: TextStyle(fontWeight: FontWeight.w700)),
+                                              ],
+                                            ),
+                                            Text(
+                                              "\"${evaluation.comentario}\"",
+                                              style: TextStyle(fontSize: 12),
+                                              softWrap: true,
+                                            ),
+                                          ],
+                                        ),
+                                      if (evaluation.evaluated == false && evaluation.evaluationAvailable == true)
+                                        Column(
+                                          children: [
+                                            Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
+                                                style: TextStyle(fontSize: 10)),
+                                            Text(evaluation.disciplina,
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Text('Avaliação Disponível', style: TextStyle(color: Colors.green[300])),
+                                            ElevatedButton(
+                                                style: ButtonStyle(
+                                                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                                        RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.circular(10.0)))),
+                                                onPressed: (() {
+                                                  _displayEvaluationDialog(evaluation);
+                                                }),
+                                                child: Text('Avaliar'))
+                                          ],
+                                        ),
+                                      if (evaluation.evaluated == false && evaluation.evaluationAvailable == false)
+                                        Column(
+                                          children: [
+                                            Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
+                                                style: TextStyle(fontSize: 10)),
+                                            Text(evaluation.disciplina,
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Text('Aluno ausente', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                                            Text('Avaliação Indisponível', style: TextStyle(color: Colors.red[400])),
+                                          ],
+                                        ),
+                                    ]),
+                                  ),
+                                );
+                              })
                         ],
                       ),
                     )

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "388535345552",
+    "project_id": "trabalho-final-pgdb",
+    "storage_bucket": "trabalho-final-pgdb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:388535345552:android:b2c215b19ebf583fd61315",
+        "android_client_info": {
+          "package_name": "com.example.pgdbapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9sx58QNXQZb_ochZB_HWBC-HOe75WqJ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

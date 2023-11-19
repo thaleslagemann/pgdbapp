@@ -1,8 +1,12 @@
-// ignore_for_file: avoid_unnecessary_containers, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_final_fields
+// ignore_for_file: avoid_unnecessary_containers, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_final_fields, unnecessary_null_comparison, no_leading_underscores_for_local_identifiers
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pgdbapp/evaluation/evaluation_page.dart';
-import 'package:pgdbapp/report/reporting_page.dart';
+import 'package:pgdbapp/login/login_page.dart';
+import 'package:provider/provider.dart';
+
+import '../models/data.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,29 +16,35 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _customTileExpanded = false;
-  int _permission = 0;
-
-  String _permissionSelector() {
-    switch (_permission) {
-      case 0:
-        return "Administrador";
-      case 1:
-        return "Aluno";
-      case 2:
-        return "Professor";
-      default:
-        return "Aluno";
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
+    var data = context.watch<Data>();
+
+    String _permissionSelector() {
+      if (data.usuarioLogado()) {
+        switch (data.getCurrentUsuario()!.cargo) {
+          case 0:
+            return "Administrador";
+          case 1:
+            return "Aluno";
+          case 2:
+            return "Professor";
+          default:
+            return "Aluno";
+        }
+      } else {
+        return 'null';
+      }
+    }
+
     return Scaffold(
         body: SafeArea(
       child: Stack(children: [
         Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
@@ -73,10 +83,28 @@ class HomePageState extends State<HomePage> {
                       Center(
                         child: Column(
                           children: [
-                            Text('Olá, User!',
-                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white)),
-                            Text('Logado como ${_permissionSelector()}',
-                                style: TextStyle(fontWeight: FontWeight.w400, color: Colors.white)),
+                            if (!data.usuarioLogado())
+                              Text('Olá, User!',
+                                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white)),
+                            if (data.usuarioLogado())
+                              Text('Olá, ${data.getCurrentUsuario()!.nome}!',
+                                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white)),
+                            if (data.usuarioLogado())
+                              Text('Logado como ${_permissionSelector()}',
+                                  style: TextStyle(fontWeight: FontWeight.w400, color: Colors.white)),
+                            if (data.usuarioLogado())
+                              Text(_auth.currentUser!.email!,
+                                  style: TextStyle(fontWeight: FontWeight.w400, color: Colors.white)),
+                            TextButton(
+                              onPressed: (() {
+                                Navigator.of(context).pop();
+                                _auth.signOut();
+                                data.userLogout();
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+                              }),
+                              child:
+                                  Text('Log out', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                            ),
                           ],
                         ),
                       ),
@@ -101,32 +129,11 @@ class HomePageState extends State<HomePage> {
                         SizedBox(
                           height: 20,
                         ),
-                        if (_permission == 0 || _permission == 2)
-                          ListTile(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                            leading: Icon(Icons.star_half_rounded, color: Colors.black87),
-                            trailing: Icon(Icons.keyboard_arrow_right, color: Colors.black87),
-                            title: Text('Avaliação de aulas', style: TextStyle(color: Colors.black87)),
-                            onTap: () {
-                              setState(() {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));
-                              });
-                            },
-                          ),
-                        if (_permission == 0 || _permission == 2)
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 30),
-                            child: Divider(
-                              thickness: 1,
-                              color: Colors.black26,
-                              height: 0,
-                            ),
-                          ),
                         ListTile(
                           contentPadding: EdgeInsets.symmetric(horizontal: 10),
                           leading: Icon(Icons.school_rounded, color: Colors.black87),
                           trailing: Icon(Icons.keyboard_arrow_right, color: Colors.black87),
-                          title: Text('Aulas Avaliadas', style: TextStyle(color: Colors.black87)),
+                          title: Text('Aulas', style: TextStyle(color: Colors.black87)),
                           onTap: () {
                             setState(() {
                               Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));
@@ -180,9 +187,7 @@ class HomePageState extends State<HomePage> {
                                           textAlign: TextAlign.start,
                                         ),
                                         onTap: () {
-                                          setState(() {
-                                            Navigator.push(context, MaterialPageRoute(builder: (context) => ReportingPage()));
-                                          });
+                                          setState(() {});
                                         },
                                       ),
                                     ),
