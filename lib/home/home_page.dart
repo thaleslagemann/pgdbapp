@@ -18,7 +18,6 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _customTileExpanded = false;
-  int _permission = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -130,30 +129,11 @@ class HomePageState extends State<HomePage> {
                         SizedBox(
                           height: 20,
                         ),
-                        if (_permission != 1)
-                          ListTile(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                            leading: Icon(Icons.star_half_rounded, color: Colors.black87),
-                            trailing: Icon(Icons.keyboard_arrow_right, color: Colors.black87),
-                            title: Text('Avaliação de aulas', style: TextStyle(color: Colors.black87)),
-                            onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));
-                            },
-                          ),
-                        if (_permission != 1)
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 30),
-                            child: Divider(
-                              thickness: 1,
-                              color: Colors.black26,
-                              height: 0,
-                            ),
-                          ),
                         ListTile(
                           contentPadding: EdgeInsets.symmetric(horizontal: 10),
                           leading: Icon(Icons.school_rounded, color: Colors.black87),
                           trailing: Icon(Icons.keyboard_arrow_right, color: Colors.black87),
-                          title: Text('Aulas Avaliadas', style: TextStyle(color: Colors.black87)),
+                          title: Text('Aulas', style: TextStyle(color: Colors.black87)),
                           onTap: () {
                             setState(() {
                               Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));

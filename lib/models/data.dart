@@ -32,13 +32,13 @@ class Data extends ChangeNotifier {
   List<Aula> _aulas = [];
 
   List<Evaluation> _aulasAvaliar = [
-    Evaluation(1, 201811779, 'ELC1071', 01, DateTime(2023, 1, 1), 10.0, 'boa aula do professor', true, false),
-    Evaluation(2, 201811779, 'EDE1131', 02, DateTime(2023, 1, 1), 0.0, '', false, true),
-    Evaluation(3, 201811779, 'ELC137', 03, DateTime(2023, 1, 1), 8.0, 'boa aula da professora', true, false),
-    Evaluation(4, 201811779, 'MAT1123', 04, DateTime(2023, 1, 1), 9.0, 'boa aula da professora', true, false),
-    Evaluation(5, 201811779, 'DPADI0185', 05, DateTime(2023, 1, 1), 10.0, 'boa aula da professora', true, false),
-    Evaluation(6, 201811779, 'DPADI0155', 05, DateTime(2023, 1, 2), 2.0, 'uma bosta', true, false),
-    Evaluation(7, 201811779, 'ELC5561', 02, DateTime(2022, 10, 12), 0.0, '', false, false),
+    // Evaluation(1, 201811779, 'ELC1071', 01, DateTime(2023, 1, 1), 10.0, 'boa aula do professor', true, false),
+    // Evaluation(2, 201811779, 'EDE1131', 02, DateTime(2023, 1, 1), 0.0, '', false, true),
+    // Evaluation(3, 201811779, 'ELC137', 03, DateTime(2023, 1, 1), 8.0, 'boa aula da professora', true, false),
+    // Evaluation(4, 201811779, 'MAT1123', 04, DateTime(2023, 1, 1), 9.0, 'boa aula da professora', true, false),
+    // Evaluation(5, 201811779, 'DPADI0185', 05, DateTime(2023, 1, 1), 10.0, 'boa aula da professora', true, false),
+    // Evaluation(6, 201811779, 'DPADI0155', 05, DateTime(2023, 1, 2), 2.0, 'uma bosta', true, false),
+    // Evaluation(7, 201811779, 'ELC5561', 02, DateTime(2022, 10, 12), 0.0, '', false, false),
   ];
 
   Future<void> setUser() async {
@@ -119,9 +119,17 @@ class Data extends ChangeNotifier {
 
     for (var turma in _turmas) {
       if (turma.disciplina == aula.disciplina) {
-        for (var aluno in turma.matAlunos) {
-          addEvaluation(
-              Evaluation(findNextEvaluationId(0), aluno, aula.disciplina, aula.aula, aula.data, 0.0, '', false, true));
+        for (var matricula in turma.matAlunos) {
+          addEvaluation(Evaluation(
+              id: findNextEvaluationId(0),
+              matricula: matricula,
+              disciplina: aula.disciplina,
+              aula: aula.aula,
+              data: aula.data,
+              nota: 0.0,
+              comentario: '',
+              evaluated: false,
+              evaluationAvailable: true));
         }
       }
     }
@@ -137,6 +145,30 @@ class Data extends ChangeNotifier {
   int getEvaluationIndex(Evaluation evaluation) {
     print(_aulasAvaliar.indexWhere((x) => x.id == evaluation.id));
     return _aulasAvaliar.indexWhere((x) => x.id == evaluation.id);
+  }
+
+  Future<void> getAvaliacoesDB() async {
+    db
+        .collection("avaliacoes")
+        .where("matricula", isEqualTo: getCurrentUsuario()!.matricula)
+        .get()
+        .then((querySnapshot) {
+      for (var docSnapshot in querySnapshot.docs) {
+        Evaluation newEvaluation = Evaluation(
+            id: docSnapshot.data()['id'],
+            matricula: docSnapshot.data()['matricula'],
+            disciplina: docSnapshot.data()['disciplina'],
+            aula: docSnapshot.data()['aula'],
+            data: (docSnapshot.data()['data'] as Timestamp).toDate(),
+            nota: docSnapshot.data()['nota'],
+            comentario: docSnapshot.data()['comentario'],
+            evaluated: docSnapshot.data()['avaliado'],
+            evaluationAvailable: docSnapshot.data()['podeAvaliar']);
+        print('${newEvaluation.id},${newEvaluation.matricula},${newEvaluation.disciplina},${newEvaluation.data}');
+        _aulasAvaliar.add(newEvaluation);
+      }
+    });
+    notifyListeners();
   }
 
   List<Evaluation> getAulas() {
@@ -259,7 +291,23 @@ class Data extends ChangeNotifier {
   }
 
   void addEvaluation(Evaluation aula) {
+    final newEvaluation = <String, dynamic>{
+      "id": aula.id,
+      "matricula": aula.matricula,
+      "disciplina": aula.disciplina,
+      "aula": aula.aula,
+      "data": aula.data,
+      "nota": 0.0,
+      "comentario": '',
+      "avaliado": aula.evaluated,
+      "podeAvaliar": aula.evaluationAvailable,
+    };
     _aulasAvaliar.add(aula);
+
+    db
+        .collection("avaliacoes")
+        .add(newEvaluation)
+        .then((DocumentReference doc) => print('Avaliação added with ID: ${doc.id}'));
   }
 
   void removeEvaluation(int index) {
@@ -285,10 +333,22 @@ class Data extends ChangeNotifier {
   }
 
   void executeEvaluation(List<dynamic> result, Evaluation e) {
-    _aulasAvaliar[getEvaluationIndex(e)].nota = result[0];
-    _aulasAvaliar[getEvaluationIndex(e)].comentario = result[1];
-    _aulasAvaliar[getEvaluationIndex(e)].evaluated = true;
+    final newEvaluation = <String, dynamic>{
+      "id": e.id,
+      "matricula": e.matricula,
+      "disciplina": e.disciplina,
+      "aula": e.aula,
+      "data": e.data,
+      "nota": result[0],
+      "comentario": result[1],
+      "avaliado": true,
+      "podeAvaliar": false,
+    };
     print('${_aulasAvaliar[getEvaluationIndex(e)].nota} ${_aulasAvaliar[getEvaluationIndex(e)].comentario}');
+    db
+        .collection("avaliacoes")
+        .add(newEvaluation)
+        .then((DocumentReference doc) => print('Avaliação added with ID: ${doc.id}'));
     notifyListeners();
   }
 }

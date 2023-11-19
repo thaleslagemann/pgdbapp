@@ -1,6 +1,14 @@
 class Evaluation {
-  Evaluation(this.id, this.matricula, this.disciplina, this.aula, this.data, this.nota, this.comentario, this.evaluated,
-      this.evaluationAvailable);
+  Evaluation(
+      {required this.id,
+      required this.matricula,
+      required this.disciplina,
+      required this.aula,
+      required this.data,
+      required this.nota,
+      required this.comentario,
+      required this.evaluated,
+      required this.evaluationAvailable});
 
   final int id;
   final int matricula;

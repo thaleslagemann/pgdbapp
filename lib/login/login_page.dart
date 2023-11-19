@@ -30,12 +30,15 @@ class LoginScreenState extends State<LoginScreen> {
             .then((value) async {
           print('teste');
           await data.setUser().then((value) {
-            if (mounted) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const HomePage()), // Substitua HomeScreen() pela tela desejada
-              );
-            }
+            data.getAvaliacoesDB().then((value) {
+              if (mounted) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const HomePage()), // Substitua HomeScreen() pela tela desejada
+                );
+              }
+            });
           });
           return value;
         });
