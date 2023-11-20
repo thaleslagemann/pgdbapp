@@ -21,32 +21,21 @@ class LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     var data = context.watch<Data>();
     Future<void> _loginUser(BuildContext context) async {
-      try {
-        UserCredential userCredential = await _auth
-            .signInWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
-        )
-            .then((value) async {
-          print('teste');
-          await data.setUser().then((value) {
-            data.getAvaliacoesDB().then((value) {
-              if (mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const HomePage()), // Substitua HomeScreen() pela tela desejada
-                );
-              }
-            });
-          });
-          return value;
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      await data.setUser();
+      data.getAvaliacoesDB();
+      if (mounted && data.usuarioLogado()) {
+        setState(() {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()), // Substitua HomeScreen() pela tela desejada
+          );
         });
-
-        print('Usuário logado: ${userCredential.user!.uid}');
-      } catch (e) {
-        print('Erro no login: $e');
       }
+      print('Usuário logado: ${userCredential.user!.uid}');
     }
 
     return Scaffold(

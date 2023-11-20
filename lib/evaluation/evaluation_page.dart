@@ -401,9 +401,9 @@ class EvaluationPageState extends State<EvaluationPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ElevatedButton(
-                            onPressed: (() {
+                            onPressed: (() async {
                               if (_nota != 0) {
-                                data.executeEvaluation([_nota, _comentarioController.text], e);
+                                await data.executeEvaluation([_nota, _comentarioController.text], e);
                                 Navigator.of(context).pop();
                                 print('Enviado');
                                 ScaffoldMessenger.of(context).hideCurrentSnackBar();

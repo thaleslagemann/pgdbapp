@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_final_fields, avoid_print
 
+import 'dart:html';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +44,7 @@ class Data extends ChangeNotifier {
   ];
 
   Future<void> setUser() async {
-    db.collection("usuarios").where("email", isEqualTo: _auth.currentUser!.email).get().then((querySnapshot) {
+    await db.collection("usuarios").where("email", isEqualTo: _auth.currentUser!.email).get().then((querySnapshot) {
       print("Successfully completed");
       for (var docSnapshot in querySnapshot.docs) {
         _usuario = Usuario(
@@ -56,7 +58,7 @@ class Data extends ChangeNotifier {
       }
       print(_auth.currentUser!.email);
       if (_usuario != null) {
-        print(_usuario);
+        print("${_usuario!.id} ${_usuario!.nome} ${_usuario!.email} ${_usuario!.matricula}");
         userLogin();
       } else {
         print("No such document.");
@@ -147,7 +149,7 @@ class Data extends ChangeNotifier {
     return _aulasAvaliar.indexWhere((x) => x.id == evaluation.id);
   }
 
-  Future<void> getAvaliacoesDB() async {
+  void getAvaliacoesDB() {
     db
         .collection("avaliacoes")
         .where("matricula", isEqualTo: getCurrentUsuario()!.matricula)
@@ -332,7 +334,7 @@ class Data extends ChangeNotifier {
     return id;
   }
 
-  void executeEvaluation(List<dynamic> result, Evaluation e) {
+  Future<void> executeEvaluation(List<dynamic> result, Evaluation e) async {
     final newEvaluation = <String, dynamic>{
       "id": e.id,
       "matricula": e.matricula,
@@ -344,11 +346,24 @@ class Data extends ChangeNotifier {
       "avaliado": true,
       "podeAvaliar": false,
     };
-    print('${_aulasAvaliar[getEvaluationIndex(e)].nota} ${_aulasAvaliar[getEvaluationIndex(e)].comentario}');
-    db
-        .collection("avaliacoes")
-        .add(newEvaluation)
-        .then((DocumentReference doc) => print('Avaliação added with ID: ${doc.id}'));
+    _aulasAvaliar[_aulasAvaliar.indexOf(e)].nota = result[0];
+    _aulasAvaliar[_aulasAvaliar.indexOf(e)].comentario = result[1];
+    _aulasAvaliar[_aulasAvaliar.indexOf(e)].evaluated = true;
+    _aulasAvaliar[_aulasAvaliar.indexOf(e)].evaluationAvailable = false;
+    print('${_aulasAvaliar[_aulasAvaliar.indexOf(e)].nota} ${_aulasAvaliar[_aulasAvaliar.indexOf(e)].comentario}');
+    var _docName;
+    await db.collection("avaliacoes").where("id", isEqualTo: e.id).get().then(
+      (querySnapshot) {
+        for (var docSnapshot in querySnapshot.docs) {
+          _docName = docSnapshot.id;
+        }
+      },
+      onError: (e) => print("Error completing: $e"),
+    );
+    final ref = db.collection("avaliacoes").doc(_docName);
+    ref.update({"nota": result[0], "comentario": result[1], "avaliado": true, "podeAvaliar": false}).then(
+        (value) => print("DocumentSnapshot successfully updated!"),
+        onError: (e) => print("Error updating document $e"));
     notifyListeners();
   }
 }

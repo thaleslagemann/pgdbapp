@@ -43,43 +43,30 @@ class RegisterUserScreenState extends State<RegisterUserScreen> {
     }
 
     Future<void> _registerUser() async {
-      try {
-        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
 
-        userCredential = await _auth
-            .signInWithEmailAndPassword(
+      userCredential = await _auth.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      await data.addNewUsuario(Usuario(
+          id: data.findNextUsuarioId(0),
+          matricula: int.parse(_matriculaController.text),
           email: _emailController.text,
-          password: _passwordController.text,
-        )
-            .then((value) async {
-          print('teste');
-          await data.setUser().then((value) async {
-            await data
-                .addNewUsuario(Usuario(
-                    id: data.findNextUsuarioId(0),
-                    matricula: int.parse(_matriculaController.text),
-                    email: _emailController.text,
-                    nome: _nomeController.text,
-                    cargo: _userType))
-                .then((value) {
-              if (mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const HomePage()), // Substitua HomeScreen() pela tela desejada
-                );
-              }
-            });
-          });
-          return value;
+          nome: _nomeController.text,
+          cargo: _userType));
+      await data.setUser();
+      data.getAvaliacoesDB();
+      if (mounted && data.usuarioLogado()) {
+        setState(() {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()), // Substitua HomeScreen() pela tela desejada
+          );
         });
-
-        print('Usuário registrado: ${userCredential.user!.uid}');
-      } catch (e) {
-        print('Erro no registro: $e');
       }
     }
 
