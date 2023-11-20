@@ -26,7 +26,11 @@ class LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text,
       );
       await data.setUser();
-      data.getAvaliacoesDB();
+      await data.getAvaliacoesDB();
+      await data.getAulasDB();
+
+      await data.getTurmasDB();
+      await data.getDisciplinasDB();
       if (mounted && data.usuarioLogado()) {
         setState(() {
           Navigator.pushReplacement(

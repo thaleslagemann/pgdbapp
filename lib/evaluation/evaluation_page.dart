@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import '../models/aula.dart';
 import '../models/data.dart';
 import '../models/evaluation.dart';
+import '../models/usuario.dart';
+import '../models/turma.dart';
 
 class EvaluationPage extends StatefulWidget {
   const EvaluationPage({super.key});
@@ -19,6 +21,7 @@ class EvaluationPageState extends State<EvaluationPage> {
   Widget build(BuildContext context) {
     var data = context.watch<Data>();
     var evaluations = data.getAulasAvaliar();
+    var turmas = data.getTurmas();
     bool _validate = true;
     final TextEditingController _codigoDisciplinaController = TextEditingController();
     final TextEditingController _numAulaController = TextEditingController();
@@ -33,7 +36,10 @@ class EvaluationPageState extends State<EvaluationPage> {
           lastDate: DateTime(2189, 1, 1));
     }
 
-    Future<void> _displayClassInsertionDialog() async {
+    Future<void> _displayClassInsertionDialog([String? cod]) async {
+      if (cod != null) {
+        _codigoDisciplinaController.text = cod;
+      }
       return showDialog(
         context: context,
         builder: (context) {
@@ -426,7 +432,55 @@ class EvaluationPageState extends State<EvaluationPage> {
       );
     }
 
-    print(data.getCurrentUsuario()!.matricula);
+    Future<void> _displayTurmaDialog(Turma turma, List<Usuario> alunos) async {
+      return showDialog(
+          context: context,
+          builder: (context) {
+            return StatefulBuilder(builder: (context, setState) {
+              return AlertDialog(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                title: Center(child: const Text('Turma')),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(turma.disciplina),
+                    Text(data.getDisciplina(turma.disciplina)!.nome),
+                    SizedBox(height: 15),
+                    Text('Alunos'),
+                    for (var aluno in alunos)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("${aluno.matricula.toString()} ${aluno.nome}"),
+                        ],
+                      ),
+                    SizedBox(height: 15),
+                    ElevatedButton(
+                        onPressed: () {
+                          _displayClassInsertionDialog(turma.disciplina);
+                        },
+                        child: Container(
+                          width: 100,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.post_add, size: 20, color: Colors.black),
+                              Text('Nova Aula', style: TextStyle(color: Colors.black)),
+                            ],
+                          ),
+                        )),
+                  ],
+                ),
+              );
+            });
+          });
+    }
+
     return Scaffold(
       floatingActionButton: _insertClassButton(),
       appBar: AppBar(
@@ -550,51 +604,48 @@ class EvaluationPageState extends State<EvaluationPage> {
                                     ),
                                   );
                                 }),
-                          if (data.getUsuarioPermission() != 1)
-                            for (var aula in data.getAulas())
-                              Consumer<Data>(builder: (context, cart, child) {
-                                return ListTile(
-                                  title: Container(
-                                    margin: EdgeInsets.symmetric(horizontal: 60),
-                                    padding: EdgeInsets.symmetric(vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      //border: Border.all(color: Colors.black, width: 1),
-                                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5),
-                                          spreadRadius: 1,
-                                          blurRadius: 4,
-                                          offset: Offset(0, 4), // changes position of shadow
-                                        ),
-                                      ],
-                                    ),
-                                    child: Column(children: [
-                                      Column(
-                                        children: [
-                                          Text(DateFormat('dd/MM/yyyy').format(aula.data),
-                                              style: TextStyle(fontSize: 10)),
-                                          Text(aula.disciplina,
-                                              style: TextStyle(
-                                                  fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              Icon(
-                                                Icons.star,
-                                                size: 20,
-                                                color: Colors.yellow[700],
-                                              ),
-                                            ],
+                          if (data.getUsuarioPermission() == 2)
+                            for (var turma in turmas)
+                              if (turma.matProfessor == data.getCurrentUsuario()!.matricula)
+                                Consumer<Data>(builder: (context, cart, child) {
+                                  return ListTile(
+                                    title: Container(
+                                      margin: EdgeInsets.symmetric(horizontal: 60),
+                                      padding: EdgeInsets.symmetric(vertical: 10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        //border: Border.all(color: Colors.black, width: 1),
+                                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey.withOpacity(0.5),
+                                            spreadRadius: 1,
+                                            blurRadius: 4,
+                                            offset: Offset(0, 4), // changes position of shadow
                                           ),
                                         ],
                                       ),
-                                    ]),
-                                  ),
-                                );
-                              }),
+                                      child: Column(children: [
+                                        Column(
+                                          children: [
+                                            Text(turma.disciplina,
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Text(data.getDisciplina(turma.disciplina)!.nome,
+                                                style: TextStyle(fontSize: 14))
+                                          ],
+                                        ),
+                                      ]),
+                                    ),
+                                    onTap: () async {
+                                      List<Usuario> alunos = await data.getAlunos(turma);
+
+                                      setState(() {
+                                        _displayTurmaDialog(turma, alunos);
+                                      });
+                                    },
+                                  );
+                                }),
                         ],
                       ),
                     )

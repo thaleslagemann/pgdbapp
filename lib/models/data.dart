@@ -26,22 +26,11 @@ class Data extends ChangeNotifier {
     Disciplina(codigo: 'EDE1131', nome: 'LIBRAS: BACHARELADO'),
   ];
 
-  List<Turma> _turmas = [
-    Turma(
-        id: 1, disciplina: 'ELC1071', matProfessor: 123456789, matAlunos: [201821179, 123456789, 000000000, 201811779])
-  ];
+  List<Turma> _turmas = [];
 
   List<Aula> _aulas = [];
 
-  List<Evaluation> _aulasAvaliar = [
-    // Evaluation(1, 201811779, 'ELC1071', 01, DateTime(2023, 1, 1), 10.0, 'boa aula do professor', true, false),
-    // Evaluation(2, 201811779, 'EDE1131', 02, DateTime(2023, 1, 1), 0.0, '', false, true),
-    // Evaluation(3, 201811779, 'ELC137', 03, DateTime(2023, 1, 1), 8.0, 'boa aula da professora', true, false),
-    // Evaluation(4, 201811779, 'MAT1123', 04, DateTime(2023, 1, 1), 9.0, 'boa aula da professora', true, false),
-    // Evaluation(5, 201811779, 'DPADI0185', 05, DateTime(2023, 1, 1), 10.0, 'boa aula da professora', true, false),
-    // Evaluation(6, 201811779, 'DPADI0155', 05, DateTime(2023, 1, 2), 2.0, 'uma bosta', true, false),
-    // Evaluation(7, 201811779, 'ELC5561', 02, DateTime(2022, 10, 12), 0.0, '', false, false),
-  ];
+  List<Evaluation> _aulasAvaliar = [];
 
   Future<void> setUser() async {
     await db.collection("usuarios").where("email", isEqualTo: _auth.currentUser!.email).get().then((querySnapshot) {
@@ -107,7 +96,7 @@ class Data extends ChangeNotifier {
     return _usuario!.cargo;
   }
 
-  void addNewAula(Aula aula) {
+  void addNewAula(Aula aula) async {
     final newAula = <String, dynamic>{
       "id": aula.id,
       "disciplina": aula.disciplina,
@@ -123,7 +112,7 @@ class Data extends ChangeNotifier {
       if (turma.disciplina == aula.disciplina) {
         for (var matricula in turma.matAlunos) {
           addEvaluation(Evaluation(
-              id: findNextEvaluationId(0),
+              id: await findNextEvaluationId(0),
               matricula: matricula,
               disciplina: aula.disciplina,
               aula: aula.aula,
@@ -149,7 +138,7 @@ class Data extends ChangeNotifier {
     return _aulasAvaliar.indexWhere((x) => x.id == evaluation.id);
   }
 
-  void getAvaliacoesDB() {
+  Future<void> getAvaliacoesDB() async {
     db
         .collection("avaliacoes")
         .where("matricula", isEqualTo: getCurrentUsuario()!.matricula)
@@ -167,11 +156,80 @@ class Data extends ChangeNotifier {
             evaluated: docSnapshot.data()['avaliado'],
             evaluationAvailable: docSnapshot.data()['podeAvaliar']);
         print('${newEvaluation.id},${newEvaluation.matricula},${newEvaluation.disciplina},${newEvaluation.data}');
-        _aulasAvaliar.add(newEvaluation);
+        if (!_aulasAvaliar.contains(newEvaluation)) {
+          _aulasAvaliar.add(newEvaluation);
+        }
       }
       _aulasAvaliar.sort((a, b) => a.data.compareTo(b.data));
     });
     notifyListeners();
+  }
+
+  Future<void> getAulasDB() async {
+    db.collection("aulas").get().then((querySnapshot) {
+      for (var docSnapshot in querySnapshot.docs) {
+        Aula newAula = Aula(
+          id: docSnapshot.data()['id'],
+          disciplina: docSnapshot.data()['disciplina'],
+          aula: docSnapshot.data()['aula'],
+          data: (docSnapshot.data()['data'] as Timestamp).toDate(),
+        );
+        print('${newAula.id},${newAula.aula},${newAula.disciplina},${newAula.data}');
+        if (!_aulas.contains(newAula)) {
+          _aulas.add(newAula);
+        }
+      }
+      _aulas.sort((a, b) => a.data.compareTo(b.data));
+    });
+    notifyListeners();
+  }
+
+  Future<void> getTurmasDB() async {
+    db.collection("turmas").get().then((querySnapshot) {
+      for (var docSnapshot in querySnapshot.docs) {
+        List<int> matAlunos = [];
+        for (var mat in docSnapshot.data()['matAlunos']) {
+          matAlunos.add(mat);
+        }
+        Turma newTurma = Turma(
+          id: docSnapshot.data()['id'],
+          disciplina: docSnapshot.data()['disciplina'],
+          matProfessor: docSnapshot.data()['matProfessor'],
+          matAlunos: matAlunos,
+        );
+        print('${newTurma.id},${newTurma.matProfessor},${newTurma.disciplina},${newTurma.matAlunos}');
+        if (!_turmas.contains(newTurma)) {
+          _turmas.add(newTurma);
+        }
+      }
+      _turmas.sort((a, b) => a.id.compareTo(b.id));
+    });
+    notifyListeners();
+  }
+
+  Future<void> getDisciplinasDB() async {
+    db.collection("disciplinas").get().then((querySnapshot) {
+      for (var docSnapshot in querySnapshot.docs) {
+        Disciplina newDisciplina = Disciplina(
+          codigo: docSnapshot.data()['codigo'],
+          nome: docSnapshot.data()['nome'],
+        );
+        print('${newDisciplina.codigo}, "${newDisciplina.nome}"');
+        if (!_disciplinas.contains(newDisciplina)) {
+          _disciplinas.add(newDisciplina);
+        }
+      }
+    });
+    notifyListeners();
+  }
+
+  Disciplina? getDisciplina(String cod) {
+    for (var disc in _disciplinas) {
+      if (disc.codigo == cod) {
+        return disc;
+      }
+    }
+    return null;
   }
 
   List<Evaluation> getAulasAvaliar() {
@@ -180,6 +238,27 @@ class Data extends ChangeNotifier {
 
   List<Aula> getAulas() {
     return _aulas;
+  }
+
+  List<Turma> getTurmas() {
+    return _turmas;
+  }
+
+  Future<List<Usuario>> getAlunos(Turma turma) async {
+    List<Usuario> alunos = [];
+    for (var mat in turma.matAlunos) {
+      await db.collection("usuarios").where("matricula", isEqualTo: mat).get().then((querySnapshot) {
+        for (var docSnapshot in querySnapshot.docs) {
+          alunos.add(Usuario(
+              id: docSnapshot.data()['id'],
+              matricula: docSnapshot.data()['matricula'],
+              email: docSnapshot.data()['email'],
+              nome: docSnapshot.data()['nome'],
+              cargo: docSnapshot.data()['cargo']));
+        }
+      });
+    }
+    return alunos;
   }
 
   void addTurma(Turma turma) {
@@ -309,12 +388,15 @@ class Data extends ChangeNotifier {
       "avaliado": evaluation.evaluated,
       "podeAvaliar": evaluation.evaluationAvailable,
     };
-    _aulasAvaliar.add(evaluation);
 
     db
         .collection("avaliacoes")
         .add(newEvaluation)
         .then((DocumentReference doc) => print('Avaliação added with ID: ${doc.id}'));
+  }
+
+  void clearEvaluations() {
+    _aulasAvaliar.clear();
   }
 
   void removeEvaluation(int index) {
@@ -331,11 +413,17 @@ class Data extends ChangeNotifier {
     return false;
   }
 
-  int findNextEvaluationId(int id) {
-    if (containsEvaluation(id)) {
-      id = id + 1;
-      findNextEvaluationId(id);
-    }
+  Future<int> findNextEvaluationId(int id) async {
+    await db.collection("aulas").get().then(
+      (querySnapshot) {
+        for (var i = 0; i < querySnapshot.docs.length; i++) {
+          if (querySnapshot.docs[i].data()['id'] > id) {
+            id = querySnapshot.docs[i].data()['id'] + 1;
+          }
+        }
+      },
+      onError: (e) => print("Error completing: $e"),
+    );
     return id;
   }
 
@@ -357,7 +445,7 @@ class Data extends ChangeNotifier {
     _aulasAvaliar[_aulasAvaliar.indexOf(e)].evaluationAvailable = false;
     print('${_aulasAvaliar[_aulasAvaliar.indexOf(e)].nota} ${_aulasAvaliar[_aulasAvaliar.indexOf(e)].comentario}');
     var _docName;
-    await db.collection("avaliacoes").where("id", isEqualTo: e.id).get().then(
+    await db.collection("avaliacoes").where("matricula", isEqualTo: _usuario!.matricula).get().then(
       (querySnapshot) {
         for (var docSnapshot in querySnapshot.docs) {
           _docName = docSnapshot.id;
@@ -367,7 +455,7 @@ class Data extends ChangeNotifier {
     );
     final ref = db.collection("avaliacoes").doc(_docName);
     ref.update({"nota": result[0], "comentario": result[1], "avaliado": true, "podeAvaliar": false}).then(
-        (value) => print("DocumentSnapshot successfully updated!"),
+        (value) => print("DocumentSnapshot successfully updated! ${ref.id}"),
         onError: (e) => print("Error updating document $e"));
     notifyListeners();
   }

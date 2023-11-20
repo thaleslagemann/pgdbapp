@@ -99,6 +99,7 @@ class HomePageState extends State<HomePage> {
                               onPressed: (() {
                                 Navigator.of(context).pop();
                                 _auth.signOut();
+                                data.clearEvaluations();
                                 data.userLogout();
                                 Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
                               }),
