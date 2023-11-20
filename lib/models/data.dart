@@ -169,12 +169,17 @@ class Data extends ChangeNotifier {
         print('${newEvaluation.id},${newEvaluation.matricula},${newEvaluation.disciplina},${newEvaluation.data}');
         _aulasAvaliar.add(newEvaluation);
       }
+      _aulasAvaliar.sort((a, b) => a.data.compareTo(b.data));
     });
     notifyListeners();
   }
 
-  List<Evaluation> getAulas() {
+  List<Evaluation> getAulasAvaliar() {
     return _aulasAvaliar;
+  }
+
+  List<Aula> getAulas() {
+    return _aulas;
   }
 
   void addTurma(Turma turma) {
@@ -292,19 +297,19 @@ class Data extends ChangeNotifier {
     return id;
   }
 
-  void addEvaluation(Evaluation aula) {
+  void addEvaluation(Evaluation evaluation) {
     final newEvaluation = <String, dynamic>{
-      "id": aula.id,
-      "matricula": aula.matricula,
-      "disciplina": aula.disciplina,
-      "aula": aula.aula,
-      "data": aula.data,
+      "id": evaluation.id,
+      "matricula": evaluation.matricula,
+      "disciplina": evaluation.disciplina,
+      "aula": evaluation.aula,
+      "data": evaluation.data,
       "nota": 0.0,
       "comentario": '',
-      "avaliado": aula.evaluated,
-      "podeAvaliar": aula.evaluationAvailable,
+      "avaliado": evaluation.evaluated,
+      "podeAvaliar": evaluation.evaluationAvailable,
     };
-    _aulasAvaliar.add(aula);
+    _aulasAvaliar.add(evaluation);
 
     db
         .collection("avaliacoes")

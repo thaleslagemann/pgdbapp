@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_final_fields
+// ignore_for_file: prefer_const_constructors, prefer_final_fields, unused_local_variable, no_leading_underscores_for_local_identifiers
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -64,7 +64,7 @@ class RegisterUserScreenState extends State<RegisterUserScreen> {
         setState(() {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const HomePage()), // Substitua HomeScreen() pela tela desejada
+            MaterialPageRoute(builder: (context) => const HomePage()),
           );
         });
       }
