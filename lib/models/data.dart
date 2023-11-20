@@ -19,18 +19,29 @@ class Data extends ChangeNotifier {
   bool _usuarioLogado = false;
 
   List<Disciplina> _disciplinas = [
-    Disciplina(codigo: 'ELC1071', nome: 'PROJETO E GERÊNCIA DE BANCO DE DADOS'),
-    Disciplina(codigo: 'ELC137', nome: 'SISTEMAS DE INFORMACAO DISTRIBUIDOS "A"'),
-    Disciplina(codigo: 'ELC1088', nome: 'IMPLEMENTAÇÃO DE LINGUAGENS DE PROGRAMAÇÃO'),
-    Disciplina(codigo: 'DPADI0185', nome: 'SISTEMAS OPERACIONAIS'),
-    Disciplina(codigo: 'EDE1131', nome: 'LIBRAS: BACHARELADO'),
+    // Disciplina(codigo: 'ELC1071', nome: 'PROJETO E GERÊNCIA DE BANCO DE DADOS'),
+    // Disciplina(codigo: 'ELC137', nome: 'SISTEMAS DE INFORMACAO DISTRIBUIDOS "A"'),
+    // Disciplina(codigo: 'ELC1088', nome: 'IMPLEMENTAÇÃO DE LINGUAGENS DE PROGRAMAÇÃO'),
+    // Disciplina(codigo: 'DPADI0185', nome: 'SISTEMAS OPERACIONAIS'),
+    // Disciplina(codigo: 'EDE1131', nome: 'LIBRAS: BACHARELADO'),
   ];
 
   List<Turma> _turmas = [];
-
   List<Aula> _aulas = [];
-
   List<Evaluation> _aulasAvaliar = [];
+
+  Future<bool> loadData() async {
+    try {
+      await getAvaliacoesDB();
+      await getAulasDB();
+      await getTurmasDB();
+      await getDisciplinasDB();
+      return true;
+    } catch (e) {
+      print("Error $e");
+      return false;
+    }
+  }
 
   Future<void> setUser() async {
     await db.collection("usuarios").where("email", isEqualTo: _auth.currentUser!.email).get().then((querySnapshot) {
@@ -395,11 +406,19 @@ class Data extends ChangeNotifier {
         .then((DocumentReference doc) => print('Avaliação added with ID: ${doc.id}'));
   }
 
-  void clearEvaluations() {
+  Future<void> clearEvaluations() async {
     _aulasAvaliar.clear();
   }
 
-  void removeEvaluation(int index) {
+  Future<void> clearAulas() async {
+    _aulas.clear;
+  }
+
+  Future<void> clearTurmas() async {
+    _turmas.clear;
+  }
+
+  Future<void> removeEvaluation(int index) async {
     _aulasAvaliar.removeAt(index);
   }
 

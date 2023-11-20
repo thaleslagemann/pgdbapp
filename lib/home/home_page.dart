@@ -96,12 +96,14 @@ class HomePageState extends State<HomePage> {
                               Text(_auth.currentUser!.email!,
                                   style: TextStyle(fontWeight: FontWeight.w400, color: Colors.white)),
                             TextButton(
-                              onPressed: (() {
-                                Navigator.of(context).pop();
-                                _auth.signOut();
+                              onPressed: (() async {
+                                Navigator.pushReplacement(
+                                    context, MaterialPageRoute(builder: (context) => LoginScreen()));
+                                await _auth.signOut();
                                 data.clearEvaluations();
+                                data.clearAulas();
+                                data.clearTurmas();
                                 data.userLogout();
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
                               }),
                               child:
                                   Text('Log out', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
@@ -130,17 +132,33 @@ class HomePageState extends State<HomePage> {
                         SizedBox(
                           height: 20,
                         ),
-                        ListTile(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                          leading: Icon(Icons.school_rounded, color: Colors.black87),
-                          trailing: Icon(Icons.keyboard_arrow_right, color: Colors.black87),
-                          title: Text('Aulas', style: TextStyle(color: Colors.black87)),
-                          onTap: () {
-                            setState(() {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));
-                            });
-                          },
-                        ),
+                        if (data.usuarioLogado())
+                          if (data.getCurrentUsuario()!.cargo == 1)
+                            ListTile(
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                              leading: Icon(Icons.school_rounded, color: Colors.black87),
+                              trailing: Icon(Icons.keyboard_arrow_right, color: Colors.black87),
+                              title: Text("Aulas", style: TextStyle(color: Colors.black87)),
+                              onTap: () async {
+                                await data.getAvaliacoesDB();
+                                await data.getAulasDB();
+                                await data.getTurmasDB();
+                                await data.getDisciplinasDB();
+                                setState(() {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));
+                                });
+                              },
+                            ),
+                        if (data.usuarioLogado())
+                          if (data.getCurrentUsuario()!.cargo == 2)
+                            ListTile(
+                                contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                                leading: Icon(Icons.school_rounded, color: Colors.black87),
+                                trailing: Icon(Icons.keyboard_arrow_right, color: Colors.black87),
+                                title: Text("Turmas", style: TextStyle(color: Colors.black87)),
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));
+                                }),
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 30),
                           child: Divider(

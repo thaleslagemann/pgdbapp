@@ -481,11 +481,24 @@ class EvaluationPageState extends State<EvaluationPage> {
           });
     }
 
+    String getPageTitle() {
+      switch (data.getCurrentUsuario()!.cargo) {
+        case 0:
+          return "Turmas";
+        case 1:
+          return "Aulas";
+        case 2:
+          return "Turmas";
+        default:
+          return "Default";
+      }
+    }
+
     return Scaffold(
       floatingActionButton: _insertClassButton(),
       appBar: AppBar(
         title: Text(
-          'Aulas',
+          getPageTitle(),
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: IconThemeData(color: Colors.white),
@@ -545,6 +558,9 @@ class EvaluationPageState extends State<EvaluationPage> {
                                               Text(evaluation.disciplina,
                                                   style: TextStyle(
                                                       fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                              Text(data.getDisciplina(evaluation.disciplina)!.nome,
+                                                  style: TextStyle(
+                                                      fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
                                               Text("Aula ${evaluation.aula}",
                                                   style: TextStyle(
                                                       fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
@@ -576,6 +592,9 @@ class EvaluationPageState extends State<EvaluationPage> {
                                               Text(evaluation.disciplina,
                                                   style: TextStyle(
                                                       fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                              Text(data.getDisciplina(evaluation.disciplina)!.nome,
+                                                  style: TextStyle(
+                                                      fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
                                               Text('Avaliação Disponível', style: TextStyle(color: Colors.green[300])),
                                               ElevatedButton(
                                                   style: ButtonStyle(
@@ -594,6 +613,9 @@ class EvaluationPageState extends State<EvaluationPage> {
                                               Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
                                                   style: TextStyle(fontSize: 10)),
                                               Text(evaluation.disciplina,
+                                                  style: TextStyle(
+                                                      fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                              Text(data.getDisciplina(evaluation.disciplina)!.nome,
                                                   style: TextStyle(
                                                       fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
                                               Text('Aluno ausente', style: TextStyle(fontSize: 12, color: Colors.grey)),
