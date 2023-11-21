@@ -1,8 +1,14 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/data.dart';
 import 'report.dart';
 
 class ReportingPage extends StatefulWidget {
-  const ReportingPage({super.key});
+  const ReportingPage({super.key, required this.media});
+
+  final double media;
 
   @override
   ReportingPageState createState() => ReportingPageState();
@@ -19,7 +25,9 @@ class ReportingPageState extends State<ReportingPage> {
 
   @override
   Widget build(BuildContext context) {
-    double media = calcularMediaMensal(relatorios, 2023, 1);
+    var data = context.watch<Data>();
+    var media = widget.media;
+    //double media = calcularMediaMensal(relatorios, 2023, 1);
 
     return Scaffold(
       appBar: AppBar(
@@ -39,85 +47,68 @@ class ReportingPageState extends State<ReportingPage> {
           ),
         ),
       ),
-      body: 
+      body: Column(children: [
         Column(
-          children: [
-          Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Padding(padding: EdgeInsets.only(top: 20.0)),
               Text('Relatório', style: TextStyle(fontSize: 18.0)),
               Divider(
-                  height: 0,
-                  color: Colors.black54,
-                  thickness: 0.5,
+                height: 0,
+                color: Colors.black54,
+                thickness: 0.5,
               ),
               Padding(
                 padding: EdgeInsets.fromLTRB(10, 0, 300, 0),
                 child: Text('A média é:'),
               ),
-             Padding(
+              Padding(
                 padding: EdgeInsets.fromLTRB(0, 60, 0, 60),
-                child:
-                Container(
+                child: Container(
                   width: 100.0,
                   height: 100.0,
                   decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.blue,
-                      width: 2.0  
-                    ),
-                    shape: BoxShape.circle,  
+                    border: Border.all(color: Colors.blue, width: 2.0),
+                    shape: BoxShape.circle,
                   ),
                   child: Center(
-                      child: Text(
-                        '${media.toStringAsFixed(1)}',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
-                        ),
+                    child: Text(
+                      '${media.toStringAsFixed(1)}',
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
                       ),
+                    ),
                   ),
                 ),
-              ),        
+              ),
               Padding(
                 padding: EdgeInsets.fromLTRB(10, 0, 300, 0),
                 child: Text('A aula está:'),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(0, 60, 0, 60),
-                child:
-                Container(
-                  width: 100.0,
-                  height: 100.0,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.blue,
-                      width: 2.0  
+                  padding: EdgeInsets.fromLTRB(0, 60, 0, 60),
+                  child: Container(
+                    width: 100.0,
+                    height: 100.0,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blue, width: 2.0),
+                      shape: BoxShape.circle,
                     ),
-                    shape: BoxShape.circle,  
-                  ),
-
-                  child: Center(
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        media > 7.0
-                        ? 'Healthy'
-                        : 'Sick',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
-                        )
-                      )
-                    )
-                  ), 
-              )),
+                    child: Center(
+                        child: Align(
+                            alignment: Alignment.center,
+                            child: Text(media > 7.0 ? 'Healthy' : 'Sick',
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                )))),
+                  )),
             ]),
-        ]),
+      ]),
     );
   }
 }

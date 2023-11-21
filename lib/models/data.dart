@@ -176,6 +176,57 @@ class Data extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<double> getMediaAvaliacoesAula(String codDisciplina, int matProfessor) async {
+    List<int> matriculas = <int>[];
+    List<double> notas = <double>[];
+    await db.collection("turmas").get().then((values) {
+      for (var value in values.docs) {
+        for (var mat in value.data()['matAlunos']) {
+          matriculas.add(int.parse(mat.toString()));
+          print('Added matricula ${mat.toString()}');
+        }
+      }
+    });
+    for (var matricula in matriculas) {
+      await db.collection("avaliacoes").where("matricula", isEqualTo: matricula).get().then((values) {
+        for (var value in values.docs) {
+          if (double.parse(value.data()['nota'].toString()) != 0) {
+            notas.add(double.parse(value.data()['nota'].toString()));
+            print('Added nota ${value.data()['nota'].toString()}');
+          }
+        }
+      });
+    }
+
+    Future<void> getTurmasProfessor(int matProfessor) async {
+      db.collection('turmas').where('matProfessor', isEqualTo: getCurrentUsuario()!.matricula).get().then((value) {
+        for (var v in value.docs) {
+          List<int> matAlunos = [];
+          for (var mat in v.data()['matAlunos']) {
+            matAlunos.add(int.parse(mat.toString()));
+          }
+          Turma newTurma = Turma(
+              id: int.parse(v.data()['id'].toString()),
+              disciplina: v.data()['disciplina'],
+              matProfessor: int.parse(v.data()['matProfessor'].toString()),
+              matAlunos: matAlunos);
+          if (containsTurma(newTurma)) {
+            _turmas.add(newTurma);
+          }
+        }
+      });
+    }
+
+    double soma = 0;
+    for (var nota in notas) {
+      soma = soma + nota;
+    }
+    var result = soma / notas.length;
+    print('Result $result');
+    notifyListeners();
+    return result;
+  }
+
   Future<void> getAulasDB() async {
     db.collection("aulas").get().then((querySnapshot) {
       for (var docSnapshot in querySnapshot.docs) {
@@ -226,6 +277,17 @@ class Data extends ChangeNotifier {
       }
     });
     notifyListeners();
+  }
+
+  void insertNewTurmaDB(Turma turma) async {
+    final newTurma = <String, dynamic>{
+      "id": turma.id,
+      "disciplina": turma.disciplina,
+      "matProfessor": turma.matProfessor,
+      "matAlunos": turma.matAlunos,
+    };
+
+    db.collection("turmas").add(newTurma).then((DocumentReference doc) => print('Turma added with ID: ${doc.id}'));
   }
 
   Future<void> getDisciplinasDB() async {
@@ -493,6 +555,28 @@ class Data extends ChangeNotifier {
     ref.update({"nota": result[0], "comentario": result[1], "avaliado": true, "podeAvaliar": false}).then(
         (value) => print("DocumentSnapshot successfully updated! ${ref.id}"),
         onError: (e) => print("Error updating document $e"));
+    notifyListeners();
+  }
+
+  Future<void> reloadEvaluations(int matricula) async {
+    db.collection("avaliacoes").where("matricula", isEqualTo: matricula).get().then((querySnapshot) {
+      for (var docSnapshot in querySnapshot.docs) {
+        Evaluation newEvaluation = Evaluation(
+            id: docSnapshot.data()['id'],
+            matricula: docSnapshot.data()['matricula'],
+            disciplina: docSnapshot.data()['disciplina'],
+            aula: docSnapshot.data()['aula'],
+            data: (docSnapshot.data()['data'] as Timestamp).toDate(),
+            nota: docSnapshot.data()['nota'],
+            comentario: docSnapshot.data()['comentario'],
+            evaluated: docSnapshot.data()['avaliado'],
+            evaluationAvailable: docSnapshot.data()['podeAvaliar']);
+        print('${newEvaluation.id},${newEvaluation.matricula},${newEvaluation.disciplina},${newEvaluation.data}');
+        if (!_aulasAvaliar.contains(newEvaluation)) {
+          _aulasAvaliar.add(newEvaluation);
+        }
+      }
+    });
     notifyListeners();
   }
 }

@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, no_leading_underscores_for_local_identifiers, must_be_immutable
+// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, no_leading_underscores_for_local_identifiers, must_be_immutable, unnecessary_null_comparison, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -20,12 +20,21 @@ class EvaluationPageState extends State<EvaluationPage> {
   @override
   Widget build(BuildContext context) {
     var data = context.watch<Data>();
-    var evaluations = data.getAulasAvaliar();
-    var turmas = data.getTurmas();
+
+    List<Evaluation> evaluations = <Evaluation>[];
+    if (evaluations.isEmpty == true) evaluations = data.getAulasAvaliar();
+
+    List<Turma> turmas = <Turma>[];
+    if (turmas.isEmpty == true) turmas = data.getTurmas();
+
     bool _validate = true;
+    DateTime _date = DateTime.now();
+
     final TextEditingController _codigoDisciplinaController = TextEditingController();
     final TextEditingController _numAulaController = TextEditingController();
-    DateTime _date = DateTime.now();
+
+    final TextEditingController _codigoDisciplinaTurmaController = TextEditingController();
+    final TextEditingController _matriculaController = TextEditingController();
 
     Future<DateTime?> _invokeDatePicker() async {
       return await showDatePicker(
@@ -36,7 +45,7 @@ class EvaluationPageState extends State<EvaluationPage> {
           lastDate: DateTime(2189, 1, 1));
     }
 
-    Future<void> _displayClassInsertionDialog([String? cod]) async {
+    Future<void> _displayAulaInsertionDialog([String? cod]) async {
       if (cod != null) {
         _codigoDisciplinaController.text = cod;
       }
@@ -163,13 +172,134 @@ class EvaluationPageState extends State<EvaluationPage> {
       );
     }
 
-    Widget? _insertClassButton() {
+    Future<void> _displayTurmaInsertionDialog() async {
+      List<int> matriculas = [];
+      return showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                  title: Center(child: const Text('Nova Turma')),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text(
+                            'Código da Disciplina:',
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'ELC12345, MAT7654, ...',
+                                hintStyle: TextStyle(
+                                    fontStyle: FontStyle.italic, color: Colors.grey, fontWeight: FontWeight.w400),
+                                errorText: _validate ? null : "Código Inexistente",
+                              ),
+                              textAlign: TextAlign.center,
+                              controller: _codigoDisciplinaTurmaController,
+                            ),
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 15),
+                      Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [Text('Matrículas:')],
+                          ),
+                          for (var mat in matriculas)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(mat.toString()),
+                              ],
+                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                child: TextField(
+                                  decoration: InputDecoration(
+                                    hintText: '123456789...',
+                                    hintStyle: TextStyle(
+                                        fontStyle: FontStyle.italic, color: Colors.grey, fontWeight: FontWeight.w400),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  keyboardType: TextInputType.number,
+                                  controller: _matriculaController,
+                                ),
+                              )
+                            ],
+                          ),
+                          IconButton(
+                              icon: Icon(Icons.add),
+                              onPressed: (() {
+                                setState(() {
+                                  if (!matriculas.contains(int.parse(_matriculaController.text))) {
+                                    matriculas.add(int.parse(_matriculaController.text));
+                                  }
+                                  _matriculaController.clear();
+                                });
+                              }))
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20.0, bottom: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: (() {
+                                _validate = data.checkCodDisciplina(_codigoDisciplinaTurmaController.text);
+                                print(_validate);
+                                setState(() {
+                                  if (_validate) {
+                                    Turma newTurma = Turma(
+                                        id: data.findNextTurmaId(0),
+                                        disciplina: _codigoDisciplinaTurmaController.text,
+                                        matProfessor: data.getCurrentUsuario()!.matricula,
+                                        matAlunos: matriculas);
+                                    data.addTurma(newTurma);
+                                    data.insertNewTurmaDB(newTurma);
+                                    turmas = data.getTurmas();
+                                    Navigator.of(context).pop();
+                                  }
+                                });
+                              }),
+                              child: Text('Enviar'),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ));
+            },
+          );
+        },
+      );
+    }
+
+    Widget? _insertAulaButton() {
       if (data.getUsuarioPermission() != 1) {
         return FloatingActionButton(
           foregroundColor: Colors.white,
           backgroundColor: Colors.deepPurple[300],
           onPressed: (() {
-            _displayClassInsertionDialog();
+            _displayAulaInsertionDialog();
           }),
           child: Icon(Icons.post_add, size: 30, color: Colors.white),
         );
@@ -410,6 +540,7 @@ class EvaluationPageState extends State<EvaluationPage> {
                             onPressed: (() async {
                               if (_nota != 0) {
                                 await data.executeEvaluation([_nota, _comentarioController.text], e);
+                                await data.reloadEvaluations(data.getCurrentUsuario()!.matricula);
                                 Navigator.of(context).pop();
                                 print('Enviado');
                                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -462,7 +593,7 @@ class EvaluationPageState extends State<EvaluationPage> {
                     SizedBox(height: 15),
                     ElevatedButton(
                         onPressed: () {
-                          _displayClassInsertionDialog(turma.disciplina);
+                          _displayAulaInsertionDialog(turma.disciplina);
                         },
                         child: Container(
                           width: 100,
@@ -495,7 +626,7 @@ class EvaluationPageState extends State<EvaluationPage> {
     }
 
     return Scaffold(
-      floatingActionButton: _insertClassButton(),
+      floatingActionButton: _insertAulaButton(),
       appBar: AppBar(
         title: Text(
           getPageTitle(),
@@ -529,103 +660,115 @@ class EvaluationPageState extends State<EvaluationPage> {
                         children: [
                           SizedBox(height: 15),
                           if (data.getUsuarioPermission()! == 1)
+                            if (evaluations.isEmpty)
+                              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                Text("Não existem dados a serem mostrados no momento"),
+                              ]),
+                          if (data.getUsuarioPermission()! == 2)
+                            if (turmas.isEmpty)
+                              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                Text("Não existem dados a serem mostrados no momento",
+                                    style: TextStyle(color: Colors.grey)),
+                              ]),
+                          if (data.getUsuarioPermission()! == 1)
                             for (var evaluation in evaluations)
                               if (evaluation.matricula == data.getCurrentUsuario()!.matricula)
-                                Consumer<Data>(builder: (context, cart, child) {
-                                  return ListTile(
-                                    title: Container(
-                                      margin: EdgeInsets.symmetric(horizontal: 60),
-                                      padding: EdgeInsets.symmetric(vertical: 10),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        //border: Border.all(color: Colors.black, width: 1),
-                                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.5),
-                                            spreadRadius: 1,
-                                            blurRadius: 4,
-                                            offset: Offset(0, 4), // changes position of shadow
-                                          ),
-                                        ],
-                                      ),
-                                      child: Column(children: [
-                                        if (evaluation.evaluated == true)
-                                          Column(
-                                            children: [
-                                              Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
-                                                  style: TextStyle(fontSize: 10)),
-                                              Text(evaluation.disciplina,
-                                                  style: TextStyle(
-                                                      fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
-                                              Text(data.getDisciplina(evaluation.disciplina)!.nome,
-                                                  style: TextStyle(
-                                                      fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
-                                              Text("Aula ${evaluation.aula}",
-                                                  style: TextStyle(
-                                                      fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.star,
-                                                    size: 20,
-                                                    color: Colors.yellow[700],
-                                                  ),
-                                                  Text(evaluation.nota.toStringAsFixed(1),
-                                                      style: TextStyle(fontWeight: FontWeight.w700)),
-                                                ],
-                                              ),
-                                              Text(
-                                                "\"${evaluation.comentario}\"",
-                                                style: TextStyle(fontSize: 12),
-                                                softWrap: true,
-                                              ),
-                                            ],
-                                          ),
-                                        if (evaluation.evaluated == false && evaluation.evaluationAvailable == true)
-                                          Column(
-                                            children: [
-                                              Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
-                                                  style: TextStyle(fontSize: 10)),
-                                              Text(evaluation.disciplina,
-                                                  style: TextStyle(
-                                                      fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
-                                              Text(data.getDisciplina(evaluation.disciplina)!.nome,
-                                                  style: TextStyle(
-                                                      fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
-                                              Text('Avaliação Disponível', style: TextStyle(color: Colors.green[300])),
-                                              ElevatedButton(
-                                                  style: ButtonStyle(
-                                                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                                          RoundedRectangleBorder(
-                                                              borderRadius: BorderRadius.circular(10.0)))),
-                                                  onPressed: (() {
-                                                    _displayEvaluationDialog(evaluation);
-                                                  }),
-                                                  child: Text('Avaliar'))
-                                            ],
-                                          ),
-                                        if (evaluation.evaluated == false && evaluation.evaluationAvailable == false)
-                                          Column(
-                                            children: [
-                                              Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
-                                                  style: TextStyle(fontSize: 10)),
-                                              Text(evaluation.disciplina,
-                                                  style: TextStyle(
-                                                      fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
-                                              Text(data.getDisciplina(evaluation.disciplina)!.nome,
-                                                  style: TextStyle(
-                                                      fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
-                                              Text('Aluno ausente', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                                              Text('Avaliação Indisponível', style: TextStyle(color: Colors.red[400])),
-                                            ],
-                                          ),
-                                      ]),
+                                ListTile(
+                                  title: Container(
+                                    margin: EdgeInsets.symmetric(horizontal: 60),
+                                    padding: EdgeInsets.symmetric(vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      //border: Border.all(color: Colors.black, width: 1),
+                                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          spreadRadius: 1,
+                                          blurRadius: 4,
+                                          offset: Offset(0, 4), // changes position of shadow
+                                        ),
+                                      ],
                                     ),
-                                  );
-                                }),
+                                    child: Column(children: [
+                                      if (evaluation.evaluated == true)
+                                        Column(
+                                          children: [
+                                            Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
+                                                style: TextStyle(fontSize: 10)),
+                                            Text(evaluation.disciplina,
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Text(data.getDisciplina(evaluation.disciplina)!.nome,
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Text("Aula ${evaluation.aula}",
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.star,
+                                                  size: 20,
+                                                  color: Colors.yellow[700],
+                                                ),
+                                                Text(evaluation.nota.toStringAsFixed(1),
+                                                    style: TextStyle(fontWeight: FontWeight.w700)),
+                                              ],
+                                            ),
+                                            Text(
+                                              "\"${evaluation.comentario}\"",
+                                              style: TextStyle(fontSize: 12),
+                                              softWrap: true,
+                                            ),
+                                          ],
+                                        ),
+                                      if (evaluation.evaluated == false && evaluation.evaluationAvailable == true)
+                                        Column(
+                                          children: [
+                                            Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
+                                                style: TextStyle(fontSize: 10)),
+                                            Text(evaluation.disciplina,
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Text(data.getDisciplina(evaluation.disciplina)!.nome,
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Text("Aula ${evaluation.aula}",
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Text('Avaliação Disponível', style: TextStyle(color: Colors.green[300])),
+                                            ElevatedButton(
+                                                style: ButtonStyle(
+                                                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                                        RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.circular(10.0)))),
+                                                onPressed: (() {
+                                                  _displayEvaluationDialog(evaluation);
+                                                }),
+                                                child: Text('Avaliar'))
+                                          ],
+                                        ),
+                                      if (evaluation.evaluated == false && evaluation.evaluationAvailable == false)
+                                        Column(
+                                          children: [
+                                            Text(DateFormat('dd/MM/yyyy').format(evaluation.data),
+                                                style: TextStyle(fontSize: 10)),
+                                            Text(evaluation.disciplina,
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Text(data.getDisciplina(evaluation.disciplina)!.nome,
+                                                style: TextStyle(
+                                                    fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 0)),
+                                            Text('Aluno ausente', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                                            Text('Avaliação Indisponível', style: TextStyle(color: Colors.red[400])),
+                                          ],
+                                        ),
+                                    ]),
+                                  ),
+                                ),
                           if (data.getUsuarioPermission() == 2)
                             for (var turma in turmas)
                               if (turma.matProfessor == data.getCurrentUsuario()!.matricula)
@@ -668,6 +811,15 @@ class EvaluationPageState extends State<EvaluationPage> {
                                     },
                                   );
                                 }),
+                          if (data.getCurrentUsuario()!.cargo == 2)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton(
+                                    onPressed: () => _displayTurmaInsertionDialog(),
+                                    child: Row(children: [Icon(Icons.add), Text('Nova Turma')])),
+                              ],
+                            ),
                         ],
                       ),
                     )

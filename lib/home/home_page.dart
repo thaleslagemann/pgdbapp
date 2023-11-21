@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pgdbapp/evaluation/evaluation_page.dart';
 import 'package:pgdbapp/login/login_page.dart';
+import 'package:pgdbapp/report/reporting_page.dart';
 import 'package:provider/provider.dart';
 
 import '../models/data.dart';
@@ -18,6 +19,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _customTileExpanded = false;
+  double media = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +41,55 @@ class HomePageState extends State<HomePage> {
         return 'null';
       }
     }
+
+    // Future<void> _displayTurmaSelector() async {
+    //   return showDialog(
+    //       context: context,
+    //       builder: (context) {
+    //         return StatefulBuilder(builder: (context, setState) {
+    //           return AlertDialog(
+    //             backgroundColor: Colors.white,
+    //             shape: RoundedRectangleBorder(
+    //               borderRadius: BorderRadius.all(Radius.circular(10)),
+    //             ),
+    //             contentPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+    //             title: Center(child: const Text('Selecionar turma')),
+    //             content: Column(
+    //               mainAxisSize: MainAxisSize.min,
+    //               mainAxisAlignment: MainAxisAlignment.center,
+    //               children: [
+    //                 Text(turma.disciplina),
+    //                 Text(data.getDisciplina(turma.disciplina)!.nome),
+    //                 SizedBox(height: 15),
+    //                 Text('Alunos'),
+    //                 for (var aluno in alunos)
+    //                   Row(
+    //                     mainAxisAlignment: MainAxisAlignment.center,
+    //                     children: [
+    //                       Text("${aluno.matricula.toString()} ${aluno.nome}"),
+    //                     ],
+    //                   ),
+    //                 SizedBox(height: 15),
+    //                 ElevatedButton(
+    //                     onPressed: () {
+    //                       _displayClassInsertionDialog(turma.disciplina);
+    //                     },
+    //                     child: Container(
+    //                       width: 100,
+    //                       child: Row(
+    //                         mainAxisAlignment: MainAxisAlignment.center,
+    //                         children: const [
+    //                           Icon(Icons.post_add, size: 20, color: Colors.black),
+    //                           Text('Nova Aula', style: TextStyle(color: Colors.black)),
+    //                         ],
+    //                       ),
+    //                     )),
+    //               ],
+    //             ),
+    //           );
+    //         });
+    //       });
+    // }
 
     return Scaffold(
         body: SafeArea(
@@ -140,10 +191,10 @@ class HomePageState extends State<HomePage> {
                               trailing: Icon(Icons.keyboard_arrow_right, color: Colors.black87),
                               title: Text("Aulas", style: TextStyle(color: Colors.black87)),
                               onTap: () async {
-                                await data.getAvaliacoesDB();
-                                await data.getAulasDB();
-                                await data.getTurmasDB();
-                                await data.getDisciplinasDB();
+                                await data.getAvaliacoesDB().then((value) => print('getAvaliacoesDB ok'));
+                                await data.getAulasDB().then((value) => print('getAulasDB ok'));
+                                await data.getTurmasDB().then((value) => print('getTurmasDB ok'));
+                                await data.getDisciplinasDB().then((value) => print('getDisciplinasDB ok'));
                                 setState(() {
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));
                                 });
@@ -179,7 +230,10 @@ class HomePageState extends State<HomePage> {
                           ),
                           iconColor: Colors.black,
                           textColor: Colors.black,
-                          onExpansionChanged: (value) {
+                          onExpansionChanged: (value) async {
+                            if (media == 0 || media == null) {
+                              media = await data.getMediaAvaliacoesAula("ELC1071", data.getCurrentUsuario()!.matricula);
+                            }
                             setState(() {
                               _customTileExpanded = !_customTileExpanded;
                             });
@@ -205,8 +259,12 @@ class HomePageState extends State<HomePage> {
                                           style: TextStyle(fontSize: 16, color: Colors.black54),
                                           textAlign: TextAlign.start,
                                         ),
-                                        onTap: () {
-                                          setState(() {});
+                                        onTap: () async {
+                                          print(media);
+                                          if (media != 0.0 && media != null) {
+                                            Navigator.push(context,
+                                                MaterialPageRoute(builder: (context) => ReportingPage(media: media)));
+                                          }
                                         },
                                       ),
                                     ),
