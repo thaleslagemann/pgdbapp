@@ -198,22 +198,32 @@ class Data extends ChangeNotifier {
   Future<void> getTurmasDB() async {
     db.collection("turmas").get().then((querySnapshot) {
       for (var docSnapshot in querySnapshot.docs) {
-        List<int> matAlunos = [];
-        for (var mat in docSnapshot.data()['matAlunos']) {
-          matAlunos.add(mat);
-        }
+        List<int> matAlunos = <int>[];
+        List.from(docSnapshot.data()['matAlunos']).forEach((mat) {
+          int data = int.parse(mat.toString());
+          matAlunos.add(data);
+        });
         Turma newTurma = Turma(
-          id: docSnapshot.data()['id'],
+          id: int.parse(docSnapshot.data()['id'].toString()),
           disciplina: docSnapshot.data()['disciplina'],
-          matProfessor: docSnapshot.data()['matProfessor'],
+          matProfessor: int.parse(docSnapshot.data()['matProfessor'].toString()),
           matAlunos: matAlunos,
         );
         print('${newTurma.id},${newTurma.matProfessor},${newTurma.disciplina},${newTurma.matAlunos}');
-        if (!_turmas.contains(newTurma)) {
+        if (!turmaExists(newTurma)) {
           _turmas.add(newTurma);
         }
       }
       _turmas.sort((a, b) => a.id.compareTo(b.id));
+      int i = 0;
+      for (var turma in _turmas) {
+        print(i);
+        i++;
+        print("Inside getTurmasDB ${turma.disciplina}");
+        for (int matAluno in turma.matAlunos) {
+          print(matAluno.toString());
+        }
+      }
     });
     notifyListeners();
   }
@@ -232,6 +242,13 @@ class Data extends ChangeNotifier {
       }
     });
     notifyListeners();
+  }
+
+  bool turmaExists(Turma turmaToCheck) {
+    for (Turma turma in _turmas) {
+      if (turma.id == turmaToCheck.id) return true;
+    }
+    return false;
   }
 
   Disciplina? getDisciplina(String cod) {
