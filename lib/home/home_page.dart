@@ -20,6 +20,9 @@ class HomePageState extends State<HomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _customTileExpanded = false;
   double media = 0;
+  String disciplinaEscolhida = '';
+  String mensagemDeAlerta = '';
+  bool loadingNotas = false;
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +157,7 @@ class HomePageState extends State<HomePage> {
                                 data.clearEvaluations();
                                 data.clearAulas();
                                 data.clearTurmas();
+                                data.clearDisciplinas();
                                 data.userLogout();
                               }),
                               child:
@@ -191,10 +195,6 @@ class HomePageState extends State<HomePage> {
                               trailing: Icon(Icons.keyboard_arrow_right, color: Colors.black87),
                               title: Text("Aulas", style: TextStyle(color: Colors.black87)),
                               onTap: () async {
-                                await data.getAvaliacoesDB().then((value) => print('getAvaliacoesDB ok'));
-                                await data.getAulasDB().then((value) => print('getAulasDB ok'));
-                                await data.getTurmasDB().then((value) => print('getTurmasDB ok'));
-                                await data.getDisciplinasDB().then((value) => print('getDisciplinasDB ok'));
                                 setState(() {
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => EvaluationPage()));
                                 });
@@ -218,105 +218,169 @@ class HomePageState extends State<HomePage> {
                             height: 0,
                           ),
                         ),
-                        ExpansionTile(
-                          tilePadding: EdgeInsets.symmetric(horizontal: 10),
-                          leading: Icon(
-                            Icons.text_snippet_rounded,
-                            color: Colors.black87,
-                          ),
-                          trailing: Icon(
-                            _customTileExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                            color: Colors.black87,
-                          ),
-                          iconColor: Colors.black,
-                          textColor: Colors.black,
-                          onExpansionChanged: (value) async {
-                            if (media == 0 || media == null) {
-                              media = await data.getMediaAvaliacoesAula("ELC1071", data.getCurrentUsuario()!.matricula);
-                            }
-                            setState(() {
-                              _customTileExpanded = !_customTileExpanded;
-                            });
-                          },
-                          shape: Border(bottom: BorderSide(color: Colors.white, width: 0)),
-                          collapsedShape: Border(bottom: BorderSide(color: Colors.white, width: 0)),
-                          title: Text('Relatórios', style: TextStyle(color: Colors.black87)),
-                          children: [
-                            Container(
-                                alignment: Alignment.centerLeft,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      margin: EdgeInsets.symmetric(horizontal: 30),
-                                      decoration: BoxDecoration(
-                                          border: Border(
-                                              bottom: BorderSide(color: Colors.black26, width: 1),
-                                              top: BorderSide(color: Colors.black26, width: 1))),
-                                      child: ListTile(
-                                        title: Text(
-                                          'Diários',
-                                          style: TextStyle(fontSize: 16, color: Colors.black54),
-                                          textAlign: TextAlign.start,
+                        if (data.usuarioLogado())
+                          if (data.getCurrentUsuario()!.cargo == 2)
+                            ExpansionTile(
+                              tilePadding: EdgeInsets.symmetric(horizontal: 10),
+                              leading: Icon(
+                                Icons.text_snippet_rounded,
+                                color: Colors.black87,
+                              ),
+                              trailing: Icon(
+                                _customTileExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                color: Colors.black87,
+                              ),
+                              iconColor: Colors.black,
+                              textColor: Colors.black,
+                              onExpansionChanged: (value) async {
+                                if (disciplinaEscolhida == '') {
+                                  mensagemDeAlerta = "*você deve escolher uma disciplina";
+                                }
+                                if (media == 0 || media == null && data.getCurrentUsuario()!.cargo == 2) {
+                                  media = await data.getMediaAvaliacoesAula(
+                                      disciplinaEscolhida, data.getCurrentUsuario()!.matricula);
+                                }
+                                setState(() {
+                                  _customTileExpanded = !_customTileExpanded;
+                                });
+                              },
+                              shape: Border(bottom: BorderSide(color: Colors.white, width: 0)),
+                              collapsedShape: Border(bottom: BorderSide(color: Colors.white, width: 0)),
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Relatórios', style: TextStyle(color: Colors.black87)),
+                                  Text(
+                                    mensagemDeAlerta,
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                  Row(
+                                    children: [
+                                      if (loadingNotas == true)
+                                        CircularProgressIndicator(
+                                          color: Colors.black,
                                         ),
-                                        onTap: () async {
-                                          print(media);
-                                          if (media != 0.0 && media != null) {
-                                            Navigator.push(context,
-                                                MaterialPageRoute(builder: (context) => ReportingPage(media: media)));
-                                          }
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text(disciplinaEscolhida),
+                                      PopupMenuButton<String>(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                                        ),
+                                        icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black),
+                                        itemBuilder: (BuildContext context) {
+                                          return data.getDisciplinaCodigos().map((String choice) {
+                                            return PopupMenuItem<String>(
+                                                value: choice,
+                                                child: Text(choice),
+                                                onTap: () async {
+                                                  setState(() {
+                                                    disciplinaEscolhida = choice;
+                                                    mensagemDeAlerta = '';
+                                                  });
+                                                  media = 0;
+                                                  if (media == 0 ||
+                                                      media == null && data.getCurrentUsuario()!.cargo == 2) {
+                                                    loadingNotas = true;
+                                                    media = await data
+                                                        .getMediaAvaliacoesAula(
+                                                            disciplinaEscolhida, data.getCurrentUsuario()!.matricula)
+                                                        .then((value) {
+                                                      loadingNotas = false;
+                                                      return value;
+                                                    });
+                                                  }
+                                                });
+                                          }).toList();
                                         },
                                       ),
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.symmetric(horizontal: 30),
-                                      decoration: BoxDecoration(
-                                          border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
-                                      child: ListTile(
-                                        title: Text(
-                                          'Semanais',
-                                          style: TextStyle(fontSize: 16, color: Colors.black54),
-                                          textAlign: TextAlign.start,
+                                    ],
+                                  )
+                                ],
+                              ),
+                              children: [
+                                Container(
+                                    alignment: Alignment.centerLeft,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          margin: EdgeInsets.symmetric(horizontal: 30),
+                                          decoration: BoxDecoration(
+                                              border: Border(
+                                                  bottom: BorderSide(color: Colors.black26, width: 1),
+                                                  top: BorderSide(color: Colors.black26, width: 1))),
+                                          child: ListTile(
+                                            title: Text(
+                                              'Diários',
+                                              style: TextStyle(fontSize: 16, color: Colors.black54),
+                                              textAlign: TextAlign.start,
+                                            ),
+                                            onTap: () async {
+                                              print(media);
+                                              if (disciplinaEscolhida == '') {
+                                                mensagemDeAlerta = "*você deve escolher uma disciplina";
+                                              }
+                                              if (media != 0.0 && media != null && disciplinaEscolhida != '') {
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) => ReportingPage(
+                                                            media: media, disciplina: disciplinaEscolhida)));
+                                              }
+                                            },
+                                          ),
                                         ),
-                                        onTap: () {
-                                          setState(() {});
-                                        },
-                                      ),
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.symmetric(horizontal: 30),
-                                      decoration: BoxDecoration(
-                                          border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
-                                      child: ListTile(
-                                        title: Text(
-                                          'Mensais',
-                                          style: TextStyle(fontSize: 16, color: Colors.black54),
-                                          textAlign: TextAlign.start,
+                                        Container(
+                                          margin: EdgeInsets.symmetric(horizontal: 30),
+                                          decoration: BoxDecoration(
+                                              border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
+                                          child: ListTile(
+                                            title: Text(
+                                              'Semanais',
+                                              style: TextStyle(fontSize: 16, color: Colors.black54),
+                                              textAlign: TextAlign.start,
+                                            ),
+                                            onTap: () {
+                                              setState(() {});
+                                            },
+                                          ),
                                         ),
-                                        onTap: () {
-                                          setState(() {});
-                                        },
-                                      ),
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.symmetric(horizontal: 30),
-                                      decoration: BoxDecoration(
-                                          border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
-                                      child: ListTile(
-                                        title: Text(
-                                          'Anuais',
-                                          style: TextStyle(fontSize: 16, color: Colors.black54),
-                                          textAlign: TextAlign.start,
+                                        Container(
+                                          margin: EdgeInsets.symmetric(horizontal: 30),
+                                          decoration: BoxDecoration(
+                                              border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
+                                          child: ListTile(
+                                            title: Text(
+                                              'Mensais',
+                                              style: TextStyle(fontSize: 16, color: Colors.black54),
+                                              textAlign: TextAlign.start,
+                                            ),
+                                            onTap: () {
+                                              setState(() {});
+                                            },
+                                          ),
                                         ),
-                                        onTap: () {
-                                          setState(() {});
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ))
-                          ],
-                        ),
+                                        Container(
+                                          margin: EdgeInsets.symmetric(horizontal: 30),
+                                          decoration: BoxDecoration(
+                                              border: Border(bottom: BorderSide(color: Colors.black26, width: 1))),
+                                          child: ListTile(
+                                            title: Text(
+                                              'Anuais',
+                                              style: TextStyle(fontSize: 16, color: Colors.black54),
+                                              textAlign: TextAlign.start,
+                                            ),
+                                            onTap: () {
+                                              setState(() {});
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ))
+                              ],
+                            ),
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 30),
                           child: Divider(

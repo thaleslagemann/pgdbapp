@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, no_leading_underscores_for_local_identifiers, must_be_immutable, unnecessary_null_comparison, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, no_leading_underscores_for_local_identifiers, must_be_immutable, unnecessary_null_comparison, prefer_const_literals_to_create_immutables, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -21,13 +21,6 @@ class EvaluationPageState extends State<EvaluationPage> {
   Widget build(BuildContext context) {
     var data = context.watch<Data>();
 
-    List<Evaluation> evaluations = <Evaluation>[];
-    if (evaluations.isEmpty == true) evaluations = data.getAulasAvaliar();
-
-    List<Turma> turmas = <Turma>[];
-    if (turmas.isEmpty == true) turmas = data.getTurmas();
-
-    bool _validate = true;
     DateTime _date = DateTime.now();
 
     final TextEditingController _codigoDisciplinaController = TextEditingController();
@@ -46,6 +39,7 @@ class EvaluationPageState extends State<EvaluationPage> {
     }
 
     Future<void> _displayAulaInsertionDialog([String? cod]) async {
+      bool _validate = true;
       if (cod != null) {
         _codigoDisciplinaController.text = cod;
       }
@@ -173,7 +167,27 @@ class EvaluationPageState extends State<EvaluationPage> {
     }
 
     Future<void> _displayTurmaInsertionDialog() async {
+      bool _validate1 = true;
+      bool _validate2 = true;
+      bool _validateMaster = true;
+      int errorSelect = 0;
+
+      String errorMsg(errorSelect) {
+        switch (errorSelect) {
+          case 0:
+            return '';
+          case 1:
+            return 'Código inválido';
+
+          case 2:
+            return 'Turma já existe';
+          default:
+            return '';
+        }
+      }
+
       List<int> matriculas = [];
+      List<String> disciplinasUsuario = await data.professorDisciplinas(data.getCurrentUsuario()!.matricula);
       return showDialog(
         context: context,
         builder: (context) {
@@ -206,7 +220,7 @@ class EvaluationPageState extends State<EvaluationPage> {
                                 hintText: 'ELC12345, MAT7654, ...',
                                 hintStyle: TextStyle(
                                     fontStyle: FontStyle.italic, color: Colors.grey, fontWeight: FontWeight.w400),
-                                errorText: _validate ? null : "Código Inexistente",
+                                errorText: errorMsg(errorSelect),
                               ),
                               textAlign: TextAlign.center,
                               controller: _codigoDisciplinaTurmaController,
@@ -263,19 +277,26 @@ class EvaluationPageState extends State<EvaluationPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ElevatedButton(
-                              onPressed: (() {
-                                _validate = data.checkCodDisciplina(_codigoDisciplinaTurmaController.text);
-                                print(_validate);
+                              onPressed: (() async {
+                                _validate1 = data.checkCodDisciplina(_codigoDisciplinaTurmaController.text);
+                                if (!_validate1) errorSelect = 1;
+                                _validate2 =
+                                    disciplinasUsuario.contains(_codigoDisciplinaTurmaController.text) == false;
+                                if (!_validate2) errorSelect = 2;
+                                print(_validate1);
+                                print(_validate2);
                                 setState(() {
-                                  if (_validate) {
+                                  if (_validate1 && _validate2) {
                                     Turma newTurma = Turma(
                                         id: data.findNextTurmaId(0),
                                         disciplina: _codigoDisciplinaTurmaController.text,
                                         matProfessor: data.getCurrentUsuario()!.matricula,
                                         matAlunos: matriculas);
+
                                     data.addTurma(newTurma);
                                     data.insertNewTurmaDB(newTurma);
-                                    turmas = data.getTurmas();
+
+                                    // turmas = data.getTurmas();
                                     Navigator.of(context).pop();
                                   }
                                 });
@@ -540,7 +561,7 @@ class EvaluationPageState extends State<EvaluationPage> {
                             onPressed: (() async {
                               if (_nota != 0) {
                                 await data.executeEvaluation([_nota, _comentarioController.text], e);
-                                await data.reloadEvaluations(data.getCurrentUsuario()!.matricula);
+                                //await data.reloadEvaluations(data.getCurrentUsuario()!.matricula);
                                 Navigator.of(context).pop();
                                 print('Enviado');
                                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -660,18 +681,18 @@ class EvaluationPageState extends State<EvaluationPage> {
                         children: [
                           SizedBox(height: 15),
                           if (data.getUsuarioPermission()! == 1)
-                            if (evaluations.isEmpty)
+                            if (data.getAulasAvaliar().isEmpty)
                               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                                 Text("Não existem dados a serem mostrados no momento"),
                               ]),
                           if (data.getUsuarioPermission()! == 2)
-                            if (turmas.isEmpty)
+                            if (data.getTurmas().isEmpty)
                               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                                 Text("Não existem dados a serem mostrados no momento",
                                     style: TextStyle(color: Colors.grey)),
                               ]),
                           if (data.getUsuarioPermission()! == 1)
-                            for (var evaluation in evaluations)
+                            for (var evaluation in data.getAulasAvaliar())
                               if (evaluation.matricula == data.getCurrentUsuario()!.matricula)
                                 ListTile(
                                   title: Container(
@@ -770,7 +791,7 @@ class EvaluationPageState extends State<EvaluationPage> {
                                   ),
                                 ),
                           if (data.getUsuarioPermission() == 2)
-                            for (var turma in turmas)
+                            for (var turma in data.getTurmas())
                               if (turma.matProfessor == data.getCurrentUsuario()!.matricula)
                                 Consumer<Data>(builder: (context, cart, child) {
                                   return ListTile(

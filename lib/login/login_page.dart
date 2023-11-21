@@ -55,6 +55,16 @@ class LoginScreenState extends State<LoginScreen> {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Align(
+                    alignment: Alignment.center,
+                    child: Text('PGDBAPP',
+                        style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold))),
+              ),
+              SizedBox(
+                height: 100,
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text('Log In',
                         style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w800))),

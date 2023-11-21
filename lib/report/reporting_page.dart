@@ -1,14 +1,16 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:pgdbapp/models/disciplina.dart';
 import 'package:provider/provider.dart';
 import '../models/data.dart';
 import 'report.dart';
 
 class ReportingPage extends StatefulWidget {
-  const ReportingPage({super.key, required this.media});
+  const ReportingPage({super.key, required this.media, required this.disciplina});
 
   final double media;
+  final String disciplina;
 
   @override
   ReportingPageState createState() => ReportingPageState();
@@ -31,9 +33,15 @@ class ReportingPageState extends State<ReportingPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Aulas',
-          style: TextStyle(color: Colors.white),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Relatório',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(widget.disciplina),
+          ],
         ),
         iconTheme: IconThemeData(color: Colors.white),
         flexibleSpace: SafeArea(
